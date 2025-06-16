@@ -1,0 +1,18 @@
+/* client/src/pages/Login.css */
+.login-container {
+  display: flex;
+  height: 100vh;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(to right, #667eea, #764ba2);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.login-card {
+  background: white;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+  width: 350px;
+  text-align: center;
+}

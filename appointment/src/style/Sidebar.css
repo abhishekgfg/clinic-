@@ -1,0 +1,68 @@
+/* src/style/Sidebar.css */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 240px;
+  height: 100vh;
+  background-color: #2f3542;
+  color: white;
+  padding-top: 20px;
+  transition: width 0.3s ease;
+  z-index: 1000;
+}
+
+.sidebar.collapsed {
+  width: 70px;
+}
+
+.toggle-btn {
+  color: white;
+  font-size: 20px;
+  margin: 0 20px 20px;
+  cursor: pointer;
+}
+
+.logo {
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+  padding-bottom: 20px;
+  color: #f1f2f6;
+}
+
+.nav-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-menu li {
+  padding: 12px 20px;
+}
+
+.nav-menu li.active,
+.nav-menu li:hover {
+  background-color: #57606f;
+}
+
+.nav-menu li a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: #dcdde1;
+  transition: 0.3s ease;
+}
+
+.nav-menu .icon {
+  font-size: 18px;
+  margin-right: 12px;
+}
+
+.sidebar.collapsed .nav-menu .text {
+  display: none;
+}
+
+.sidebar.collapsed .logo {
+  display: none;
+}
