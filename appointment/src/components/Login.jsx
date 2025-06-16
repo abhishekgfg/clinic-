@@ -5,24 +5,20 @@ import "../style/Login.css";
 const Login = ({ onLoginSuccess }) => {
   const [error, setError] = useState(null);
 
-  const handleLogin = async ({ username, password }) => {
-    try {
-      const validUsers = [
-        { username: "abhi", password: "123" }, // Admin-like user
-        { username: "user", password: "123" }  // Regular user
-      ];
+  const validUsers = [
+    { username: "abhi", password: "123", role: "admin" },
+    { username: "reception", password: "123", role: "reception" },
+    { username: "doctor", password: "123", role: "doctor" },
+    { username: "staff", password: "123", role: "staff" }
+  ];
 
-      const isValid = validUsers.find(
-        (u) => u.username === username && u.password === password
-      );
+  const handleLogin = ({ username, password }) => {
+    const user = validUsers.find(u => u.username === username && u.password === password);
 
-      if (isValid) {
-        onLoginSuccess(username); // Pass the username to parent
-      } else {
-        setError("Invalid credentials");
-      }
-    } catch (err) {
-      setError("Login failed. Please try again.");
+    if (user) {
+      onLoginSuccess(user.username, user.role);
+    } else {
+      setError("Invalid credentials");
     }
   };
 

@@ -7,7 +7,6 @@ const statusOptions = ["Scheduled", "Cancelled", "Rescheduled"];
 const AppointmentTable = ({ appointments, loggedInUser }) => {
   const [localAppointments, setLocalAppointments] = useState([]);
 
-  // Sync local state with props
   useEffect(() => {
     setLocalAppointments(appointments);
   }, [appointments]);
@@ -15,12 +14,8 @@ const AppointmentTable = ({ appointments, loggedInUser }) => {
   const handleStatusChange = async (id, newStatus) => {
     try {
       await axios.patch(`/api/appointments/${id}/status`, { status: newStatus });
-
-      // Update local state
       setLocalAppointments((prev) =>
-        prev.map((app) =>
-          app._id === id ? { ...app, status: newStatus } : app
-        )
+        prev.map((app) => (app._id === id ? { ...app, status: newStatus } : app))
       );
     } catch (error) {
       console.error("Error updating status", error.response?.data || error.message);
@@ -29,13 +24,19 @@ const AppointmentTable = ({ appointments, loggedInUser }) => {
   };
 
   const handleDelete = async (id) => {
+    if (loggedInUser !== "abhi") {
+      alert("Access Denied: You do not have permission to delete appointments.");
+      return;
+    }
+
     const confirmDelete = window.confirm("Are you sure you want to delete this appointment?");
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(`/api/appointments/${id}`);
+      await axios.delete(`/api/appointments/${id}`, {
+        headers: { username: loggedInUser }
+      });
 
-      // Remove from local state
       setLocalAppointments((prev) => prev.filter((app) => app._id !== id));
     } catch (error) {
       console.error("Error deleting appointment", error.response?.data || error.message);
@@ -81,11 +82,17 @@ const AppointmentTable = ({ appointments, loggedInUser }) => {
                     </select>
                   </td>
                   <td>
-                    {loggedInUser === "abhi" && (
-                      <button className="delete-button" onClick={() => handleDelete(app._id)}>
-                        Delete
-                      </button>
-                    )}
+                    <button
+                      className="delete-button"
+                      onClick={() => handleDelete(app._id)}
+                      disabled={loggedInUser !== "abhi"}
+                      style={{
+                        opacity: loggedInUser === "abhi" ? 1 : 0.5,
+                        cursor: loggedInUser === "abhi" ? "pointer" : "not-allowed"
+                      }}
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))
