@@ -2,9 +2,13 @@
 import React, { useState } from "react";
 import { FaHome, FaUserFriends, FaCalendarAlt, FaSignOutAlt, FaBars } from "react-icons/fa";
 import "../style/Sidebar.css";
+import { useAuth } from "../context/AuthContext"; // ✅ import useAuth
+import { useNavigate } from "react-router-dom";   // ✅ for redirect
 
 const Sidebar = ({ activeSection, setActiveSection }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { logout } = useAuth();       // ✅ get logout function
+  const navigate = useNavigate();     // ✅ for redirect after logout
 
   const menuItems = [
     { name: "Dashboard", icon: <FaHome />, key: "home" },
@@ -14,8 +18,8 @@ const Sidebar = ({ activeSection, setActiveSection }) => {
   ];
 
   const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn");
-    window.location.href = "/";
+    logout();              // ✅ clear auth state + localStorage
+    navigate("/login");    // ✅ redirect to login
   };
 
   return (
@@ -31,7 +35,7 @@ const Sidebar = ({ activeSection, setActiveSection }) => {
             className={activeSection === item.key ? "active" : ""}
             onClick={() => {
               if (item.key === "logout") {
-                handleLogout();
+                handleLogout(); // ✅ call the correct logout
               } else {
                 setActiveSection(item.key);
               }

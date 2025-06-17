@@ -1,11 +1,14 @@
+// src/components/AppointmentTable.js
 import React, { useEffect, useState } from "react";
 import "../style/AppointmentTable.css";
 import axios from "axios";
+import { useAuth } from "../context/AuthContext";
 
 const statusOptions = ["Scheduled", "Cancelled", "Rescheduled"];
 
-const AppointmentTable = ({ appointments, loggedInUser }) => {
+const AppointmentTable = ({ appointments }) => {
   const [localAppointments, setLocalAppointments] = useState([]);
+  const { user } = useAuth();
 
   useEffect(() => {
     setLocalAppointments(appointments);
@@ -18,28 +21,20 @@ const AppointmentTable = ({ appointments, loggedInUser }) => {
         prev.map((app) => (app._id === id ? { ...app, status: newStatus } : app))
       );
     } catch (error) {
-      console.error("Error updating status", error.response?.data || error.message);
       alert("Failed to update appointment status");
     }
   };
 
   const handleDelete = async (id) => {
-    if (loggedInUser !== "abhi") {
-      alert("Access Denied: You do not have permission to delete appointments.");
-      return;
-    }
-
     const confirmDelete = window.confirm("Are you sure you want to delete this appointment?");
     if (!confirmDelete) return;
 
     try {
       await axios.delete(`/api/appointments/${id}`, {
-        headers: { username: loggedInUser }
+        headers: { username: user.username }
       });
-
       setLocalAppointments((prev) => prev.filter((app) => app._id !== id));
     } catch (error) {
-      console.error("Error deleting appointment", error.response?.data || error.message);
       alert("Failed to delete appointment");
     }
   };
@@ -48,7 +43,6 @@ const AppointmentTable = ({ appointments, loggedInUser }) => {
     <div className="appointment-card table-card">
       <h2>📋 Appointment Records</h2>
       <div className="appointment-table-container">
-        <h2 className="appointment-heading">Appointment Schedule</h2>
         <table className="appointment-table">
           <thead>
             <tr>
@@ -56,7 +50,7 @@ const AppointmentTable = ({ appointments, loggedInUser }) => {
               <th>Date</th>
               <th>Time</th>
               <th>Status</th>
-              <th>Action</th>
+              {user.role === "admin" && <th>Action</th>}
             </tr>
           </thead>
           <tbody>
@@ -81,19 +75,16 @@ const AppointmentTable = ({ appointments, loggedInUser }) => {
                       ))}
                     </select>
                   </td>
-                  <td>
-                    <button
-                      className="delete-button"
-                      onClick={() => handleDelete(app._id)}
-                      disabled={loggedInUser !== "abhi"}
-                      style={{
-                        opacity: loggedInUser === "abhi" ? 1 : 0.5,
-                        cursor: loggedInUser === "abhi" ? "pointer" : "not-allowed"
-                      }}
-                    >
-                      Delete
-                    </button>
-                  </td>
+                  {user.role === "admin" && (
+                    <td>
+                      <button
+                        className="delete-button"
+                        onClick={() => handleDelete(app._id)}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))
             )}

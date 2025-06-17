@@ -7,6 +7,7 @@ import AppointmentTable from "../components/AppointmentTable";
 import "../style/Dashboard.css";
 import "../style/Patients.css";
 import AppointmentSection from '../components/AppointmentSection';
+import { useAuth } from "../context/AuthContext";
 
 // ✅ Add Patient Form
 const AddPatientForm = ({ onAdd }) => {
@@ -39,7 +40,9 @@ const AddPatientForm = ({ onAdd }) => {
 };
 
 // ✅ Patients Section
+
 const PatientsSection = ({ patients, fetchData }) => {
+  const { user } = useAuth(); // Get logged-in user from AuthContext
   const [selectedPatients, setSelectedPatients] = useState([]);
 
   const handleSelect = (id) => {
@@ -108,19 +111,32 @@ const PatientsSection = ({ patients, fetchData }) => {
     <>
       <div className="card">
         <h2>➕ Add New Patient</h2>
-        <AddPatientForm onAdd={async (data) => {
-          await axios.post("/api/patients/add", data);
-          fetchData();
-        }} />
+        <AddPatientForm
+          onAdd={async (data) => {
+            await axios.post("/api/patients/add", data);
+            fetchData();
+          }}
+        />
         <div className="import-section">
           <h4>📁 Import from Excel/CSV</h4>
-          <input type="file" accept=".csv, .xls, .xlsx" onChange={handleFileUpload} className="file-upload" />
+          <input
+            type="file"
+            accept=".csv, .xls, .xlsx"
+            onChange={handleFileUpload}
+            className="file-upload"
+          />
         </div>
       </div>
 
       <div className="table-card">
         <h2 className="section-heading">🧾 Patient Details</h2>
-        <button className="delete-selected-btn" onClick={handleDeleteSelected}>🗑️ Delete Selected</button>
+        
+        {user?.role === "admin" && (
+          <button className="delete-selected-btn" onClick={handleDeleteSelected}>
+            🗑️ Delete Selected
+          </button>
+        )}
+
         <div className="table-wrapper">
           <table className="patients-table">
             <thead>
@@ -149,7 +165,9 @@ const PatientsSection = ({ patients, fetchData }) => {
 
             <tbody>
               {patients.length === 0 ? (
-                <tr><td colSpan="7" className="no-data">No patients found.</td></tr>
+                <tr>
+                  <td colSpan="7" className="no-data">No patients found.</td>
+                </tr>
               ) : (
                 patients.map((p) => (
                   <tr key={p._id}>
@@ -187,13 +205,22 @@ const PatientsSection = ({ patients, fetchData }) => {
                       </select>
                     </td>
                     <td>
-                      <button className="edit-btn" onClick={() => handleEdit(p)}>✏️ Edit</button>
-                      <button className="delete-btn" onClick={async () => {
-                        if (window.confirm("Delete this patient?")) {
-                          await axios.delete(`/api/patients/delete/${p._id}`);
-                          fetchData();
-                        }
-                      }}>🗑️ Delete</button>
+                      {user?.role === "admin" && (
+                        <>
+                          <button className="edit-btn" onClick={() => handleEdit(p)}>✏️ Edit</button>
+                          <button
+                            className="delete-btn"
+                            onClick={async () => {
+                              if (window.confirm("Delete this patient?")) {
+                                await axios.delete(`/api/patients/delete/${p._id}`);
+                                fetchData();
+                              }
+                            }}
+                          >
+                            🗑️ Delete
+                          </button>
+                        </>
+                      )}
                     </td>
                   </tr>
                 ))
@@ -205,6 +232,8 @@ const PatientsSection = ({ patients, fetchData }) => {
     </>
   );
 };
+
+
 
 const generateTimeSlots = () => {
   const startHour = 9;
