@@ -2,13 +2,18 @@ import React, { useEffect, useState } from "react";
 import "../style/AppointmentTable.css";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 const statusOptions = ["Scheduled", "Cancelled", "Rescheduled"];
 
 const AppointmentTable = ({ appointments }) => {
   const [localAppointments, setLocalAppointments] = useState([]);
   const { user } = useAuth();
-  const [rescheduleInfo, setRescheduleInfo] = useState({}); // { [id]: { date, time } }
+  const [rescheduleInfo, setRescheduleInfo] = useState({}); // { [id]: { date, time, location } }
 
   useEffect(() => {
     setLocalAppointments(appointments);
@@ -18,7 +23,7 @@ const AppointmentTable = ({ appointments }) => {
     if (newStatus === "Rescheduled") {
       setRescheduleInfo((prev) => ({
         ...prev,
-        [id]: { date: "", time: "" },
+        [id]: { date: "", time: "", location: "" },
       }));
     } else {
       try {
@@ -34,11 +39,10 @@ const AppointmentTable = ({ appointments }) => {
 
   const handleRescheduleSubmit = async (id) => {
     const { date, time, location } = rescheduleInfo[id];
-if (!date || !time || !location) {
-  alert("Please select date, time and location to reschedule.");
-  return;
-}
-
+    if (!date || !time || !location) {
+      alert("Please select date, time and location to reschedule.");
+      return;
+    }
 
     try {
       await axios.patch(`/api/appointments/${id}/reschedule`, {
@@ -50,7 +54,7 @@ if (!date || !time || !location) {
 
       setLocalAppointments((prev) =>
         prev.map((app) =>
-          app._id === id ? { ...app, status: "Rescheduled", date, time,location } : app
+          app._id === id ? { ...app, status: "Rescheduled", date, time, location } : app
         )
       );
 
@@ -78,9 +82,62 @@ if (!date || !time || !location) {
     }
   };
 
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    doc.text("Appointment Records", 14, 10);
+
+    const tableData = localAppointments.map((app) => [
+      app.patientId?.name || "N/A",
+      app.date,
+      app.time,
+      app.location || "N/A",
+      app.message || "N/A",
+      app.notes || "N/A",
+      app.status,
+    ]);
+
+    autoTable(doc, {
+  head: [["Patient", "Date", "Time", "Location", "Message", "Notes", "Status"]],
+  body: tableData,
+});
+
+
+    doc.save("appointments.pdf");
+  };
+
+  const exportToExcel = () => {
+    const worksheetData = localAppointments.map((app) => ({
+      Patient: app.patientId?.name || "N/A",
+      Date: app.date,
+      Time: app.time,
+      Location: app.location || "N/A",
+      Message: app.message || "N/A",
+      Notes: app.notes || "N/A",
+      Status: app.status,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Appointments");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    const data = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(data, "appointments.xlsx");
+  };
+
   return (
     <div className="appointment-card table-card">
       <h2>📋 Appointment Records</h2>
+
+      <div style={{ marginBottom: "15px", display: "flex", gap: "10px" }}>
+        <button onClick={exportToPDF} className="export-button">Export to PDF</button>
+        <button onClick={exportToExcel} className="export-button">Export to Excel</button>
+      </div>
+
       <div className="appointment-table-container">
         <table className="appointment-table">
           <thead>
@@ -174,22 +231,22 @@ if (!date || !time || !location) {
                           <option value="07:00 PM - 07:30 PM">07:00 PM - 07:30 PM</option>
                           <option value="07:30 PM - 08:00 PM">07:30 PM - 08:00 PM</option>
                         </select>
-                        <input
-  type="text"
-  placeholder="Enter location"
-  value={rescheduleInfo[app._id].location}
-  onChange={(e) =>
-    setRescheduleInfo((prev) => ({
-      ...prev,
-      [app._id]: {
-        ...prev[app._id],
-        location: e.target.value,
-      },
-    }))
-  }
-  style={{ marginLeft: "8px", padding: "6px", marginTop: "8px" }}
-/>
 
+                        <input
+                          type="text"
+                          placeholder="Enter location"
+                          value={rescheduleInfo[app._id].location}
+                          onChange={(e) =>
+                            setRescheduleInfo((prev) => ({
+                              ...prev,
+                              [app._id]: {
+                                ...prev[app._id],
+                                location: e.target.value,
+                              },
+                            }))
+                          }
+                          style={{ marginLeft: "8px", padding: "6px", marginTop: "8px" }}
+                        />
 
                         <button
                           className="reschedule-button"

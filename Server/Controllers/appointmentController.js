@@ -27,13 +27,10 @@ exports.addAppointment = async (req, res) => {
   }
 };
 
-// Get all appointments
+// ✅ Get all appointments (visible to all users)
 exports.getAllAppointments = async (req, res) => {
   try {
-    const username = req.headers.username;
-    const query = username === "abhi" ? {} : { createdBy: username };
-
-    const appointments = await Appointment.find(query).populate("patientId");
+    const appointments = await Appointment.find().populate("patientId");
     res.json(appointments);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch appointments" });
@@ -60,7 +57,7 @@ exports.updateAppointmentStatus = async (req, res) => {
   }
 };
 
-// Delete appointment (admin-only)
+// ✅ Delete appointment (admin-only)
 exports.deleteAppointment = async (req, res) => {
   try {
     const username = req.headers.username;

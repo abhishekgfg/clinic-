@@ -129,6 +129,21 @@
   border-radius: 6px;
 }
 
+.export-button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.export-button:hover {
+  background-color: #2980b9;
+}
+
+
 .delete-button {
   background-color: #ff4d4f;
   border: none;
