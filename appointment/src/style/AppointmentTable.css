@@ -141,3 +141,39 @@
 .delete-button:hover {
   background-color: #d9363e;
 }
+
+
+@media (max-width: 600px) {
+  .appointment-table-container {
+    overflow-x: auto;
+    padding: 10px;
+    box-shadow: none;
+    border-radius: 8px;
+  }
+
+  .appointment-table {
+    min-width: 600px;
+    font-size: 13px;
+  }
+
+  .appointment-table th,
+  .appointment-table td {
+    padding: 8px 10px;
+    white-space: nowrap;
+    font-size: 12px;
+  }
+
+  .status-dropdown {
+    font-size: 12px;
+    padding: 4px 6px;
+  }
+
+  .delete-button {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+
+  .appointment-heading {
+    font-size: 20px;
+  }
+}

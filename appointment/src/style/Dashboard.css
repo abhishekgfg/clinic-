@@ -279,7 +279,7 @@
 .card {
   flex: 1;
   min-width: 320px;
-  background: #fff;
+  background: #c17676;
   padding: 25px 30px;
   border-radius: 12px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
@@ -438,32 +438,6 @@
 }
 
 /* Import Section */
-.import-section {
-  margin-top: 30px;
-  border-top: 1px dashed #ccc;
-  padding-top: 15px;
-}
-
-.import-section h4 {
-  font-size: 16px;
-  margin-bottom: 10px;
-  color: #333;
-  font-weight: 500;
-}
-
-.import-section input[type="file"] {
-  border: 1px solid #ccc;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 14px;
-  background-color: #f1f1f1;
-  transition: all 0.2s ease;
-}
-
-.import-section input[type="file"]:hover {
-  background-color: #e9e9e9;
-  border-color: #888;
-}
 
 /* Loader / Error */
 .loader,
@@ -569,6 +543,7 @@
 @media (max-width: 768px) {
   .appointment-form, .add-patient-form {
     flex-direction: column;
+    width: 100%;
   }
   
   .appointment-form select,
@@ -592,7 +567,7 @@
 
 .stat-card {
   flex: 1;
-  background: #f8f9fa;
+  background: #f7f8f9;
   padding: 20px;
   border-left: 5px solid #007bff;
   border-radius: 8px;
@@ -674,4 +649,305 @@
   body {
     padding-top: 0px;
   }
+}
+
+
+
+@media (max-width: 768px) {
+  .add-patient-form {
+    flex-direction: column;
+  }
+
+  .add-patient-form input,
+  .add-patient-form button {
+    width: 100%;
+  }
+
+  .edit-btn,
+  .delete-btn {
+    width: 100%;
+    margin-bottom: 5px;
+  }
+
+  .patients-table th,
+  .patients-table td {
+    font-size: 14px;
+    padding: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .patients-table {
+    font-size: 12px;
+  }
+
+  .patients-table th,
+  .patients-table td {
+    padding: 4px;
+  }
+
+  .status-dropdown {
+    font-size: 12px;
+  }
+
+  .edit-btn,
+  .delete-btn {
+    font-size: 12px;
+  }
+}
+
+
+
+
+
+@media (max-width: 768px) {
+  .card{
+    width:100%;
+  }
+  .add-patient-form {
+    flex-direction: column;
+    width: 90%;
+    gap: 8px;
+  }
+
+  .add-patient-form input,
+  .add-patient-form textarea,
+  .add-patient-form select {
+    height: 36px;
+    padding: 6px 10px;
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+
+  
+}
+
+.card-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Or 'center' if you want full vertical center */
+  padding: 20px;
+}
+
+.card {
+  flex: 1;
+  min-width: 280px;
+  max-width: 450px;
+  background: #f5ecec;
+  padding: 25px 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* Mobile Responsive */
+@media (max-width: 480px) {
+  .card {
+    padding: 15px 20px;
+    font-size: 14px;
+    max-width: 95%;
+  }
+}
+
+@media (max-width: 480px) {
+  .add-patient-form input {
+    height: 32px;
+    padding: 4px 10px;
+    font-size: 13px;
+  }
+
+  .add-patient-form button {
+    height: 36px;
+    font-size: 14px;
+    padding: 6px 12px;
+  }
+}
+
+
+
+
+.import-section {
+  margin-top: 30px;
+  border-top: 1px dashed #fefbfb;
+  padding-top: 15px;
+  padding-left: 10px;
+  padding-right: 10px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.import-section h4 {
+  font-size: 16px;
+  margin-bottom: 10px;
+  color: #333;
+  font-weight: 500;
+  text-align: center;
+}
+
+.import-section input[type="file"] {
+  width: 100%;
+  max-width: 300px;
+  border: 1px solid #f9f9f9;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: #f1f1f1;
+  transition: all 0.2s ease;
+  display: block;
+  margin: 0 auto;
+}
+
+.import-section input[type="file"]:hover {
+  background-color: #ffffff;
+  border-color: #d1cbcb;
+}
+
+/* Media Query for smaller devices */
+@media (max-width: 480px) {
+  .import-section {
+    margin-top: 20px;
+    padding-top: 10px;
+  }
+
+  .import-section h4 {
+    font-size: 14px;
+  }
+
+  .import-section input[type="file"] {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+}
+
+
+
+@media (max-width: 600px) {
+  .stats-overview {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .stat-card {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .stat-card h3 {
+    font-size: 14px;
+  }
+
+  .stat-card p {
+    font-size: 18px;
+  }
+}
+
+
+@media (max-width: 600px) {
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+  }
+
+  .patients-table {
+    min-width: 500px;
+    border-collapse: collapse;
+  }
+
+  .patients-table th,
+  .patients-table td {
+    padding: 8px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .status-dropdown {
+    font-size: 12px;
+    padding: 4px 6px;
+  }
+
+  .edit-btn,
+  .delete-btn {
+    font-size: 12px;
+    padding: 4px 6px;
+    margin: 2px;
+  }
+
+  .delete-selected-btn {
+    font-size: 13px;
+    padding: 6px 10px;
+    margin-bottom: 10px;
+  }
+}
+
+
+
+
+/* Add to the very top of your CSS */
+html, body {
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+  width: 100%;
+  max-width: 100%;
+}
+
+.dashboard-container {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box; /* Include padding in width calculation */
+}
+
+/* For tables on mobile */
+@media (max-width: 768px) {
+  .table-wrapper {
+    width:82vw;
+    position: relative;
+    left: 61%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -60vw;
+  }
+  
+  
+  
+  /* Specifically target iOS devices */
+  @supports (-webkit-touch-callout: none) {
+    .dashboard-container {
+      position: fixed;
+      width: 100%;
+      height: 90%;
+      overflow-y: scroll;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+}
+
+/* Ensure cards don't cause overflow */
+.card {
+  max-width: calc(100% - 40px); /* Account for padding */
+  margin: 0 auto;
+}
+
+/* Fix for form elements causing overflow */
+.add-patient-form input,
+.add-patient-form select,
+.add-patient-form textarea {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Additional safety measures */
+* {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+/* Prevent any element from causing overflow */
+img, table, td, blockquote, code, pre, textarea, input, video {
+  max-width: 100%;
 }

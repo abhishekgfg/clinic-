@@ -34,40 +34,92 @@ const AddPatientForm = ({ onAdd }) => {
   };
 
   return (
-    <form className="add-patient-form" onSubmit={handleSubmit}>
-      <input
-        type="text"
-        name="name"
-        placeholder="Full Name"
-        value={formData.name}
-        onChange={handleChange}
-        required
-      />
-      <input
-        type="number"
-        name="age"
-        placeholder="Age"
-        value={formData.age}
-        onChange={handleChange}
-        required
-      />
-      <input
-        type="text"
-        name="contact"
-        placeholder="Contact"
-        value={formData.contact}
-        onChange={handleChange}
-        required
-      />
-      <input
-        type="email"
-        name="email"
-        placeholder="Email (optional)"
-        value={formData.email}
-        onChange={handleChange}
-      />
-      <button type="submit">➕ Add Patient</button>
-    </form>
+ <form
+  className="add-patient-form1"
+  onSubmit={handleSubmit}
+  style={{
+    display: "flex",
+    flexDirection: "column",
+    width: "100%",
+    gap: "10px",
+    maxWidth: "500px",
+    margin: "auto",
+     borderRadius: "10px"
+  }}
+>
+  <input
+    type="text"
+    name="name"
+    placeholder="Full Name"
+    value={formData.name}
+    onChange={handleChange}
+    required
+    style={{
+      height: "40px",
+      fontSize: "14px",
+      padding: "4px 8px",
+      borderRadius: "10px"
+    
+    }}
+  />
+  <input
+    type="number"
+    name="age"
+    placeholder="Age"
+    value={formData.age}
+    onChange={handleChange}
+    required
+    style={{
+      height: "40px",
+      fontSize: "14px",
+      padding: "4px 8px",
+      borderRadius: "10px"
+      
+    }}
+  />
+  <input
+    type="text"
+    name="contact"
+    placeholder="Contact"
+    value={formData.contact}
+    onChange={handleChange}
+    required
+    style={{
+      height: "40px",
+      fontSize: "14px",
+      padding: "4px 8px",
+      borderRadius: "10px"
+    }}
+  />
+  <input
+    type="email"
+    name="email"
+    placeholder="Email (optional)"
+    value={formData.email}
+    onChange={handleChange}
+    style={{
+      height: "40px",
+      fontSize: "14px",
+      padding: "4px 8px",
+      borderRadius: "10px"
+    }}
+  />
+  <button
+    type="submit"
+    style={{
+      height: "36px",
+      fontSize: "14px",
+      backgroundColor: "#2f3542",
+      color: "white",
+      border: "none",
+      borderRadius: "4px",
+      cursor: "pointer"
+    }}
+  >
+    ➕ Add Patient
+  </button>
+</form>
+
   );
 };
 
@@ -150,28 +202,38 @@ const PatientsSection = ({ patients, fetchData }) => {
 
   return (
     <>
-      <div className="card">
-        <h2>➕ Add New Patient</h2>
-        <AddPatientForm
-          onAdd={async (data) => {
-            await axios.post("/api/patients/add", data, {
-              headers: {
-                username: user?.username
-              }
-            });
-            fetchData();
-          }}
-        />
-        <div className="import-section">
-          <h4>📁 Import from Excel/CSV</h4>
-          <input
-            type="file"
-            accept=".csv, .xls, .xlsx"
-            onChange={handleFileUpload}
-            className="file-upload"
-          />
-        </div>
-      </div>
+      <div className="card-wrapper">
+  <div className="card">
+  <h2
+  style={{
+    marginLeft: window.innerWidth > 768 ? "0" : "0",
+    transition: "margin-left 0.3s ease"
+  }}
+>
+  ➕ Add New Patient
+</h2>
+
+
+    <AddPatientForm
+      onAdd={async (data) => {
+        await axios.post("/api/patients/add", data, {
+          headers: { username: user?.username },
+        });
+        fetchData();
+      }}
+    />
+    <div className="import-section">
+      <h4>📁 Import from Excel/CSV</h4>
+      <input
+        type="file"
+        accept=".csv, .xls, .xlsx"
+        onChange={handleFileUpload}
+        className="file-upload"
+      />
+    </div>
+  </div>
+</div>
+
 
       <div className="table-card">
         <h2 className="section-heading">🧾 Patient Details</h2>
