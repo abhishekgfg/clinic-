@@ -1,4 +1,3 @@
-// src/components/AppointmentTable.js
 import React, { useEffect, useState } from "react";
 import "../style/AppointmentTable.css";
 import axios from "axios";
@@ -9,19 +8,59 @@ const statusOptions = ["Scheduled", "Cancelled", "Rescheduled"];
 const AppointmentTable = ({ appointments }) => {
   const [localAppointments, setLocalAppointments] = useState([]);
   const { user } = useAuth();
+  const [rescheduleInfo, setRescheduleInfo] = useState({}); // { [id]: { date, time } }
 
   useEffect(() => {
     setLocalAppointments(appointments);
   }, [appointments]);
 
   const handleStatusChange = async (id, newStatus) => {
+    if (newStatus === "Rescheduled") {
+      setRescheduleInfo((prev) => ({
+        ...prev,
+        [id]: { date: "", time: "" },
+      }));
+    } else {
+      try {
+        await axios.patch(`/api/appointments/${id}/status`, { status: newStatus });
+        setLocalAppointments((prev) =>
+          prev.map((app) => (app._id === id ? { ...app, status: newStatus } : app))
+        );
+      } catch (error) {
+        alert("Failed to update appointment status");
+      }
+    }
+  };
+
+  const handleRescheduleSubmit = async (id) => {
+    const { date, time, location } = rescheduleInfo[id];
+if (!date || !time || !location) {
+  alert("Please select date, time and location to reschedule.");
+  return;
+}
+
+
     try {
-      await axios.patch(`/api/appointments/${id}/status`, { status: newStatus });
+      await axios.patch(`/api/appointments/${id}/reschedule`, {
+        date,
+        time,
+        location,
+        status: "Rescheduled"
+      });
+
       setLocalAppointments((prev) =>
-        prev.map((app) => (app._id === id ? { ...app, status: newStatus } : app))
+        prev.map((app) =>
+          app._id === id ? { ...app, status: "Rescheduled", date, time,location } : app
+        )
       );
+
+      setRescheduleInfo((prev) => {
+        const updated = { ...prev };
+        delete updated[id];
+        return updated;
+      });
     } catch (error) {
-      alert("Failed to update appointment status");
+      alert("Failed to reschedule appointment.");
     }
   };
 
@@ -31,7 +70,7 @@ const AppointmentTable = ({ appointments }) => {
 
     try {
       await axios.delete(`/api/appointments/${id}`, {
-        headers: { username: user.username }
+        headers: { username: user.username },
       });
       setLocalAppointments((prev) => prev.filter((app) => app._id !== id));
     } catch (error) {
@@ -49,6 +88,9 @@ const AppointmentTable = ({ appointments }) => {
               <th>Patient</th>
               <th>Date</th>
               <th>Time</th>
+              <th>Location</th>
+              <th>Message</th>
+              <th>Notes</th>
               <th>Status</th>
               {user.role === "admin" && <th>Action</th>}
             </tr>
@@ -56,7 +98,9 @@ const AppointmentTable = ({ appointments }) => {
           <tbody>
             {localAppointments.length === 0 ? (
               <tr>
-                <td colSpan="5" style={{ textAlign: "center" }}>No appointments found</td>
+                <td colSpan="8" style={{ textAlign: "center" }}>
+                  No appointments found
+                </td>
               </tr>
             ) : (
               localAppointments.map((app) => (
@@ -64,17 +108,100 @@ const AppointmentTable = ({ appointments }) => {
                   <td>{app.patientId?.name || "N/A"}</td>
                   <td>{app.date}</td>
                   <td>{app.time}</td>
+                  <td>{app.location || "N/A"}</td>
+                  <td>{app.message || "N/A"}</td>
+                  <td>{app.notes || "N/A"}</td>
                   <td>
                     <select
                       className="status-dropdown"
-                      value={app.status}
+                      value={rescheduleInfo[app._id] ? "Rescheduled" : app.status}
                       onChange={(e) => handleStatusChange(app._id, e.target.value)}
                     >
                       {statusOptions.map((status) => (
-                        <option key={status} value={status}>{status}</option>
+                        <option key={status} value={status}>
+                          {status}
+                        </option>
                       ))}
                     </select>
+
+                    {rescheduleInfo[app._id] && (
+                      <div className="reschedule-inputs" style={{ marginTop: "10px" }}>
+                        <input
+                          type="date"
+                          min={new Date().toISOString().split("T")[0]}
+                          value={rescheduleInfo[app._id].date}
+                          onChange={(e) =>
+                            setRescheduleInfo((prev) => ({
+                              ...prev,
+                              [app._id]: {
+                                ...prev[app._id],
+                                date: e.target.value,
+                              },
+                            }))
+                          }
+                        />
+
+                        <select
+                          value={rescheduleInfo[app._id].time}
+                          onChange={(e) =>
+                            setRescheduleInfo((prev) => ({
+                              ...prev,
+                              [app._id]: {
+                                ...prev[app._id],
+                                time: e.target.value,
+                              },
+                            }))
+                          }
+                          style={{ marginLeft: "8px", padding: "6px" }}
+                        >
+                          <option value="">Select time</option>
+                          <option value="11:00 AM - 11:30 AM">11:00 AM - 11:30 AM</option>
+                          <option value="11:30 AM - 12:00 PM">11:30 AM - 12:00 PM</option>
+                          <option value="12:00 PM - 12:30 PM">12:00 PM - 12:30 PM</option>
+                          <option value="12:30 PM - 01:00 PM">12:30 PM - 01:00 PM</option>
+                          <option value="01:00 PM - 01:30 PM">01:00 PM - 01:30 PM</option>
+                          <option value="01:30 PM - 02:00 PM">01:30 PM - 02:00 PM</option>
+                          <option value="02:00 PM - 02:30 PM">02:00 PM - 02:30 PM</option>
+                          <option value="02:30 PM - 03:00 PM">02:30 PM - 03:00 PM</option>
+                          <option value="03:00 PM - 03:30 PM">03:00 PM - 03:30 PM</option>
+                          <option value="03:30 PM - 04:00 PM">03:30 PM - 04:00 PM</option>
+                          <option value="04:00 PM - 04:30 PM">04:00 PM - 04:30 PM</option>
+                          <option value="04:30 PM - 05:00 PM">04:30 PM - 05:00 PM</option>
+                          <option value="05:00 PM - 05:30 PM">05:00 PM - 05:30 PM</option>
+                          <option value="05:30 PM - 06:00 PM">05:30 PM - 06:00 PM</option>
+                          <option value="06:00 PM - 06:30 PM">06:00 PM - 06:30 PM</option>
+                          <option value="06:30 PM - 07:00 PM">06:30 PM - 07:00 PM</option>
+                          <option value="07:00 PM - 07:30 PM">07:00 PM - 07:30 PM</option>
+                          <option value="07:30 PM - 08:00 PM">07:30 PM - 08:00 PM</option>
+                        </select>
+                        <input
+  type="text"
+  placeholder="Enter location"
+  value={rescheduleInfo[app._id].location}
+  onChange={(e) =>
+    setRescheduleInfo((prev) => ({
+      ...prev,
+      [app._id]: {
+        ...prev[app._id],
+        location: e.target.value,
+      },
+    }))
+  }
+  style={{ marginLeft: "8px", padding: "6px", marginTop: "8px" }}
+/>
+
+
+                        <button
+                          className="reschedule-button"
+                          onClick={() => handleRescheduleSubmit(app._id)}
+                          style={{ marginLeft: "10px" }}
+                        >
+                          Reschedule
+                        </button>
+                      </div>
+                    )}
                   </td>
+
                   {user.role === "admin" && (
                     <td>
                       <button

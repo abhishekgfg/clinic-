@@ -345,22 +345,33 @@ const PatientsSection = ({ patients, fetchData }) => {
   );
 };
 
+
+// Function to generate 30-min time ranges from 11:00 AM to 8:00 PM
 const generateTimeSlots = () => {
-  const startHour = 9;
-  const endHour = 20;
   const slots = [];
-  for (let hour = startHour; hour <= endHour; hour++) {
-    for (let min = 0; min < 60; min += 30) {
-      const h = hour.toString().padStart(2, "0");
-      const m = min === 0 ? "00" : "30";
-      slots.push(`${h}:${m}`);
-    }
+  const start = 11 * 60; // 11:00 AM in minutes
+  const end = 20 * 60;   // 8:00 PM in minutes
+
+  for (let mins = start; mins < end; mins += 30) {
+    const format = (totalMins) => {
+      let h = Math.floor(totalMins / 60);
+      const m = totalMins % 60;
+      const ampm = h >= 12 ? "PM" : "AM";
+      h = h % 12 || 12;
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')} ${ampm}`;
+    };
+    const startLabel = format(mins);
+    const endLabel = format(mins + 30);
+    slots.push(`${startLabel} - ${endLabel}`);
   }
+
   return slots;
 };
 
+
+
 const AppointmentsSection = ({ patients, appointments, fetchData }) => {
-  const { user } = useAuth(); // ✅ using AuthContext for current user
+  const { user } = useAuth();
   const timeSlots = generateTimeSlots();
 
   const eligiblePatients = patients.filter(
@@ -372,7 +383,11 @@ const AppointmentsSection = ({ patients, appointments, fetchData }) => {
     date: "",
     time: "",
     notes: "",
+    location: "",
+  message: "",
   });
+
+  const today = new Date().toISOString().split("T")[0]; // For min date
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -381,14 +396,16 @@ const AppointmentsSection = ({ patients, appointments, fetchData }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.patientId || !formData.date || !formData.time) {
+    const { patientId, date, time } = formData;
+
+    if (!patientId || !date || !time) {
       return alert("Please fill all required fields");
     }
 
     try {
       await axios.post("/api/appointments/add", formData, {
         headers: {
-          username: user.username, // ✅ Send username to backend
+          username: user.username,
         },
       });
       setFormData({ patientId: "", date: "", time: "", notes: "" });
@@ -401,7 +418,6 @@ const AppointmentsSection = ({ patients, appointments, fetchData }) => {
 
   return (
     <div className="appointments-section">
-      {/* Form Section */}
       <div className="appointment-form-container">
         <h2 className="section-title">📅 Schedule an Appointment</h2>
         <form className="appointment-form" onSubmit={handleSubmit}>
@@ -424,6 +440,7 @@ const AppointmentsSection = ({ patients, appointments, fetchData }) => {
             name="date"
             value={formData.date}
             onChange={handleChange}
+            min={today}
             required
           />
 
@@ -447,11 +464,28 @@ const AppointmentsSection = ({ patients, appointments, fetchData }) => {
             value={formData.notes}
             onChange={handleChange}
           ></textarea>
+          <input
+  type="text"
+  name="location"
+  placeholder="Enter location"
+  value={formData.location}
+  onChange={handleChange}
+  required
+/>
+
+<textarea
+  name="message"
+  placeholder="Enter message for patient"
+  value={formData.message}
+  onChange={handleChange}
+/>
+
 
           <button type="submit">➕ Schedule</button>
         </form>
       </div>
 
+      {/* Appointment list table */}
       <AppointmentTable appointments={appointments} />
     </div>
   );
@@ -484,6 +518,11 @@ const DashboardHome = ({ patients, appointments, setActiveSection, setSelectedSt
     setSelectedStatus(status);
     setActiveSection("patients");
   };
+  const handleRescheduledAppointmentsClick = () => {
+  setSelectedStatus("Rescheduled");
+  setActiveSection("appointments");
+};
+
 
   return (
     <>
@@ -521,17 +560,19 @@ const DashboardHome = ({ patients, appointments, setActiveSection, setSelectedSt
           <h3>Scheduled</h3>
           <p>{statusCounts["Scheduled"]}</p>
         </div>
-        <div className="stat-card status-rescheduled" onClick={() => setActiveSection("appointments")}>
-          <h3>Rescheduled Appointments</h3>
-          <p>{rescheduledAppointmentsCount}</p>
-        </div>
+        <div className="stat-card status-rescheduled" onClick={handleRescheduledAppointmentsClick}>
+  <h3>Rescheduled Appointments</h3>
+  <p>{rescheduledAppointmentsCount}</p>
+</div>
+
       </div>
     </>
   );
 };
 
+
 const Dashboard = ({ onLogout }) => {
-  const { user } = useAuth(); // ✅ get logged-in user
+  const { user } = useAuth();
 
   const [activeSection, setActiveSection] = useState("home");
   const [patients, setPatients] = useState([]);
@@ -544,10 +585,10 @@ const Dashboard = ({ onLogout }) => {
     try {
       const [pRes, aRes] = await Promise.all([
         axios.get("/api/patients/all", {
-          headers: { username: user.username }, // ✅ send username
+          headers: { username: user.username },
         }),
         axios.get("/api/appointments/all", {
-          headers: { username: user.username }, // ✅ send username
+          headers: { username: user.username },
         }),
       ]);
       setPatients(pRes.data || []);
@@ -569,15 +610,16 @@ const Dashboard = ({ onLogout }) => {
     ? patients.filter((p) => (p.status || "In Progress") === selectedStatus)
     : patients;
 
+  const filteredAppointments = selectedStatus
+    ? appointments.filter((a) => a.status === selectedStatus)
+    : appointments;
+
   if (loading) return <div className="loader">Loading...</div>;
   if (error) return <div className="error-message">{error}</div>;
 
   return (
     <div style={{ display: "flex" }}>
-      <Sidebar
-        activeSection={activeSection}
-        setActiveSection={setActiveSection}
-      />
+      <Sidebar activeSection={activeSection} setActiveSection={setActiveSection} />
 
       <div
         className="dashboard-container"
@@ -592,7 +634,7 @@ const Dashboard = ({ onLogout }) => {
             marginBottom: "20px",
           }}
         >
-          <h2>Welcome, {user.username}</h2> {/* ✅ replaced loggedInUser */}
+          <h2>Welcome, {user.username}</h2>
           <button onClick={onLogout} className="logout-button">
             Logout
           </button>
@@ -608,16 +650,13 @@ const Dashboard = ({ onLogout }) => {
         )}
 
         {activeSection === "patients" && (
-          <PatientsSection
-            patients={filteredPatients}
-            fetchData={fetchData}
-          />
+          <PatientsSection patients={filteredPatients} fetchData={fetchData} />
         )}
 
         {activeSection === "appointments" && (
           <AppointmentsSection
             patients={patients}
-            appointments={appointments}
+            appointments={filteredAppointments}
             fetchData={fetchData}
           />
         )}

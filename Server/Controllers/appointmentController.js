@@ -1,10 +1,11 @@
-const Appointment = require("../Models/Appointment");
+const Appointment = require("../models/Appointment");
 
+// Add new appointment
 exports.addAppointment = async (req, res) => {
-  const { patientId, date, time, notes } = req.body;
+  const { patientId, date, time, notes, location, message } = req.body;
   const username = req.headers.username;
 
-  if (!patientId || !username || !date || !time) {
+  if (!patientId || !username || !date || !time || !location) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
@@ -14,6 +15,8 @@ exports.addAppointment = async (req, res) => {
       date,
       time,
       notes,
+      location,
+      message,
       createdBy: username,
     });
 
@@ -24,6 +27,7 @@ exports.addAppointment = async (req, res) => {
   }
 };
 
+// Get all appointments
 exports.getAllAppointments = async (req, res) => {
   try {
     const username = req.headers.username;
@@ -36,6 +40,7 @@ exports.getAllAppointments = async (req, res) => {
   }
 };
 
+// Update appointment status
 exports.updateAppointmentStatus = async (req, res) => {
   try {
     const { status } = req.body;
@@ -46,7 +51,8 @@ exports.updateAppointmentStatus = async (req, res) => {
       { status },
       { new: true }
     );
-    if (!updated) return res.status(404).json({ error: "Not found" });
+
+    if (!updated) return res.status(404).json({ error: "Appointment not found" });
 
     res.json({ message: "Status updated", appointment: updated });
   } catch (err) {
@@ -54,6 +60,7 @@ exports.updateAppointmentStatus = async (req, res) => {
   }
 };
 
+// Delete appointment (admin-only)
 exports.deleteAppointment = async (req, res) => {
   try {
     const username = req.headers.username;
@@ -68,5 +75,32 @@ exports.deleteAppointment = async (req, res) => {
     res.json({ message: "Appointment deleted" });
   } catch (err) {
     res.status(500).json({ error: "Failed to delete appointment" });
+  }
+};
+
+// Reschedule appointment (update date, time, and optionally location/message)
+exports.rescheduleAppointment = async (req, res) => {
+  try {
+    const { date, time, location, message, status } = req.body;
+
+    if (!date || !time || status !== "Rescheduled") {
+      return res.status(400).json({ error: "Date, time, and valid reschedule status are required" });
+    }
+
+    const updateFields = { date, time, status };
+    if (location) updateFields.location = location;
+    if (message) updateFields.message = message;
+
+    const updated = await Appointment.findByIdAndUpdate(
+      req.params.id,
+      updateFields,
+      { new: true }
+    );
+
+    if (!updated) return res.status(404).json({ error: "Appointment not found" });
+
+    res.json({ message: "Appointment rescheduled", appointment: updated });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to reschedule appointment" });
   }
 };

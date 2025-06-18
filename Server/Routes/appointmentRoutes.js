@@ -5,11 +5,13 @@ const {
   getAllAppointments,
   updateAppointmentStatus,
   deleteAppointment,
-} = require("../Controllers/appointmentController");
+  rescheduleAppointment,
+} = require("../controllers/appointmentController");
 
 router.post("/add", addAppointment);
 router.get("/all", getAllAppointments);
 router.patch("/:id/status", updateAppointmentStatus);
 router.delete("/:id", deleteAppointment);
+router.patch("/:id/reschedule", rescheduleAppointment);
 
 module.exports = router;
