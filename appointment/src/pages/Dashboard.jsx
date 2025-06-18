@@ -9,7 +9,7 @@ import "../style/Patients.css";
 import AppointmentSection from '../components/AppointmentSection';
 import { useAuth } from "../context/AuthContext";
 
-// ✅ Add Patient Form
+// Add Patient Form
 const AddPatientForm = ({ onAdd }) => {
   const [formData, setFormData] = useState({
     name: "",
