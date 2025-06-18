@@ -5,6 +5,7 @@ const appointmentSchema = new mongoose.Schema({
   date: String,
   time: String,
   notes: String,
+  createdBy: { type: String, required: true },
   status: { type: String, default: "Scheduled" },
 });
 

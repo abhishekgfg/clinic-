@@ -1,9 +1,12 @@
 const Patient = require('../Models/Patient');
 
-// Get all patients
+// Get all patients (admin sees all, others see only theirs)
 exports.getAllPatients = async (req, res) => {
   try {
-    const patients = await Patient.find().sort({ createdAt: -1 });
+    const username = req.headers.username;
+    const query = username === 'abhi' ? {} : { createdBy: username };
+
+    const patients = await Patient.find(query).sort({ createdAt: -1 });
     res.json(patients);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch patients' });
@@ -13,10 +16,12 @@ exports.getAllPatients = async (req, res) => {
 // Add a new patient
 exports.addPatient = async (req, res) => {
   const { name, age, contact, email } = req.body;
-  if (!name) return res.status(400).json({ error: 'Name is required' });
+  const username = req.headers.username;
+
+  if (!name || !username) return res.status(400).json({ error: 'Name and username required' });
 
   try {
-    const newPatient = new Patient({ name, age, contact, email });
+    const newPatient = new Patient({ name, age, contact, email, createdBy: username });
     await newPatient.save();
     res.status(201).json({ message: 'Patient added', patient: newPatient });
   } catch (err) {
@@ -26,13 +31,15 @@ exports.addPatient = async (req, res) => {
 
 // Bulk Add Patients
 exports.bulkAddPatients = async (req, res) => {
+  const username = req.headers.username;
   const data = req.body;
-  if (!Array.isArray(data)) {
-    return res.status(400).json({ error: 'Invalid array' });
+
+  if (!Array.isArray(data) || !username) {
+    return res.status(400).json({ error: 'Invalid data or missing username' });
   }
 
   try {
-    const valid = data.filter(p => p.name);
+    const valid = data.filter(p => p.name).map(p => ({ ...p, createdBy: username }));
     const inserted = await Patient.insertMany(valid);
     res.status(201).json({ message: `${inserted.length} patients added`, patients: inserted });
   } catch (err) {
@@ -56,7 +63,7 @@ exports.updateStatus = async (req, res) => {
   }
 };
 
-// ✅ Edit full patient details
+// Edit full patient details
 exports.updatePatient = async (req, res) => {
   const { name, age, contact, email } = req.body;
   try {
@@ -72,7 +79,7 @@ exports.updatePatient = async (req, res) => {
   }
 };
 
-// ✅ Delete patient
+// Delete patient
 exports.deletePatient = async (req, res) => {
   try {
     const deleted = await Patient.findByIdAndDelete(req.params.id);

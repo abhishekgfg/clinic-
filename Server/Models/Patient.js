@@ -5,6 +5,7 @@ const patientSchema = new mongoose.Schema({
   age: Number,
   contact: String,
   email: String,
+  createdBy: { type: String, required: true }, // 👈 new field
   status: {
     type: String,
     enum: ['In Progress', 'Call', 'Ready for Consultation', 'Payment Done', 'Scheduled'],

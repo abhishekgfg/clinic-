@@ -11,7 +11,12 @@ import { useAuth } from "../context/AuthContext";
 
 // ✅ Add Patient Form
 const AddPatientForm = ({ onAdd }) => {
-  const [formData, setFormData] = useState({ name: "", age: "", contact: "", email: "" });
+  const [formData, setFormData] = useState({
+    name: "",
+    age: "",
+    contact: "",
+    email: ""
+  });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -30,19 +35,44 @@ const AddPatientForm = ({ onAdd }) => {
 
   return (
     <form className="add-patient-form" onSubmit={handleSubmit}>
-      <input type="text" name="name" placeholder="Full Name" value={formData.name} onChange={handleChange} required />
-      <input type="number" name="age" placeholder="Age" value={formData.age} onChange={handleChange} required />
-      <input type="text" name="contact" placeholder="Contact" value={formData.contact} onChange={handleChange} required />
-      <input type="email" name="email" placeholder="Email (optional)" value={formData.email} onChange={handleChange} />
+      <input
+        type="text"
+        name="name"
+        placeholder="Full Name"
+        value={formData.name}
+        onChange={handleChange}
+        required
+      />
+      <input
+        type="number"
+        name="age"
+        placeholder="Age"
+        value={formData.age}
+        onChange={handleChange}
+        required
+      />
+      <input
+        type="text"
+        name="contact"
+        placeholder="Contact"
+        value={formData.contact}
+        onChange={handleChange}
+        required
+      />
+      <input
+        type="email"
+        name="email"
+        placeholder="Email (optional)"
+        value={formData.email}
+        onChange={handleChange}
+      />
       <button type="submit">➕ Add Patient</button>
     </form>
   );
 };
 
-// ✅ Patients Section
-
 const PatientsSection = ({ patients, fetchData }) => {
-  const { user } = useAuth(); // Get logged-in user from AuthContext
+  const { user } = useAuth();
   const [selectedPatients, setSelectedPatients] = useState([]);
 
   const handleSelect = (id) => {
@@ -70,7 +100,12 @@ const PatientsSection = ({ patients, fetchData }) => {
 
     if (name && age && contact) {
       try {
-        await axios.put(`/api/patients/update/${p._id}`, { name, age, contact, email });
+        await axios.put(`/api/patients/update/${p._id}`, {
+          name,
+          age,
+          contact,
+          email
+        });
         fetchData();
       } catch (err) {
         alert("Failed to update patient");
@@ -95,8 +130,13 @@ const PatientsSection = ({ patients, fetchData }) => {
         const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
         for (const patient of jsonData) {
-          await axios.post("/api/patients/add", patient);
+          await axios.post("/api/patients/add", patient, {
+            headers: {
+              username: user?.username
+            }
+          });
         }
+
         await fetchData();
         alert("✅ Patients imported successfully!");
       } catch (err) {
@@ -104,6 +144,7 @@ const PatientsSection = ({ patients, fetchData }) => {
         alert("❌ Error importing patient data.");
       }
     };
+
     reader.readAsArrayBuffer(file);
   };
 
@@ -113,7 +154,11 @@ const PatientsSection = ({ patients, fetchData }) => {
         <h2>➕ Add New Patient</h2>
         <AddPatientForm
           onAdd={async (data) => {
-            await axios.post("/api/patients/add", data);
+            await axios.post("/api/patients/add", data, {
+              headers: {
+                username: user?.username
+              }
+            });
             fetchData();
           }}
         />
@@ -130,7 +175,7 @@ const PatientsSection = ({ patients, fetchData }) => {
 
       <div className="table-card">
         <h2 className="section-heading">🧾 Patient Details</h2>
-        
+
         {user?.role === "admin" && (
           <button className="delete-selected-btn" onClick={handleDeleteSelected}>
             🗑️ Delete Selected
@@ -162,11 +207,12 @@ const PatientsSection = ({ patients, fetchData }) => {
                 <th>Actions</th>
               </tr>
             </thead>
-
             <tbody>
               {patients.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="no-data">No patients found.</td>
+                  <td colSpan="7" className="no-data">
+                    No patients found.
+                  </td>
                 </tr>
               ) : (
                 patients.map((p) => (
@@ -189,7 +235,9 @@ const PatientsSection = ({ patients, fetchData }) => {
                         onChange={async (e) => {
                           const newStatus = e.target.value;
                           try {
-                            await axios.put(`/api/patients/update-status/${p._id}`, { status: newStatus });
+                            await axios.put(`/api/patients/update-status/${p._id}`, {
+                              status: newStatus
+                            });
                             fetchData();
                           } catch (err) {
                             console.error("Status update error:", err);
@@ -207,7 +255,9 @@ const PatientsSection = ({ patients, fetchData }) => {
                     <td>
                       {user?.role === "admin" && (
                         <>
-                          <button className="edit-btn" onClick={() => handleEdit(p)}>✏️ Edit</button>
+                          <button className="edit-btn" onClick={() => handleEdit(p)}>
+                            ✏️ Edit
+                          </button>
                           <button
                             className="delete-btn"
                             onClick={async () => {
@@ -233,13 +283,10 @@ const PatientsSection = ({ patients, fetchData }) => {
   );
 };
 
-
-
 const generateTimeSlots = () => {
   const startHour = 9;
   const endHour = 20;
   const slots = [];
-
   for (let hour = startHour; hour <= endHour; hour++) {
     for (let min = 0; min < 60; min += 30) {
       const h = hour.toString().padStart(2, "0");
@@ -251,18 +298,13 @@ const generateTimeSlots = () => {
 };
 
 const AppointmentsSection = ({ patients, appointments, fetchData }) => {
+  const { user } = useAuth(); // ✅ using AuthContext for current user
+  const timeSlots = generateTimeSlots();
+
   const eligiblePatients = patients.filter(
     (p) => p.status === "Payment Done" || p.status === "Scheduled"
   );
 
-  const patientMap = patients.reduce((acc, curr) => {
-    acc[curr._id] = curr;
-    return acc;
-  }, {});
-
-const [loggedInUser, setLoggedInUser] = useState("abhi"); // or from props/login
-
-  const timeSlots = generateTimeSlots();
   const [formData, setFormData] = useState({
     patientId: "",
     date: "",
@@ -281,9 +323,18 @@ const [loggedInUser, setLoggedInUser] = useState("abhi"); // or from props/login
       return alert("Please fill all required fields");
     }
 
-    await axios.post("/api/appointments/add", formData);
-    setFormData({ patientId: "", date: "", time: "", notes: "" });
-    fetchData();
+    try {
+      await axios.post("/api/appointments/add", formData, {
+        headers: {
+          username: user.username, // ✅ Send username to backend
+        },
+      });
+      setFormData({ patientId: "", date: "", time: "", notes: "" });
+      fetchData();
+    } catch (error) {
+      console.error("Appointment error:", error.response?.data || error.message);
+      alert("Failed to schedule appointment");
+    }
   };
 
   return (
@@ -305,6 +356,7 @@ const [loggedInUser, setLoggedInUser] = useState("abhi"); // or from props/login
               </option>
             ))}
           </select>
+
           <input
             type="date"
             name="date"
@@ -312,6 +364,7 @@ const [loggedInUser, setLoggedInUser] = useState("abhi"); // or from props/login
             onChange={handleChange}
             required
           />
+
           <select
             name="time"
             value={formData.time}
@@ -325,17 +378,19 @@ const [loggedInUser, setLoggedInUser] = useState("abhi"); // or from props/login
               </option>
             ))}
           </select>
+
           <textarea
             name="notes"
             placeholder="Add any notes (optional)"
             value={formData.notes}
             onChange={handleChange}
           ></textarea>
+
           <button type="submit">➕ Schedule</button>
         </form>
       </div>
-      <AppointmentTable appointments={appointments} loggedInUser={loggedInUser} />
 
+      <AppointmentTable appointments={appointments} />
     </div>
   );
 };
@@ -413,7 +468,9 @@ const DashboardHome = ({ patients, appointments, setActiveSection, setSelectedSt
   );
 };
 
-const Dashboard = ({ loggedInUser, onLogout }) => {
+const Dashboard = ({ onLogout }) => {
+  const { user } = useAuth(); // ✅ get logged-in user
+
   const [activeSection, setActiveSection] = useState("home");
   const [patients, setPatients] = useState([]);
   const [appointments, setAppointments] = useState([]);
@@ -421,12 +478,15 @@ const Dashboard = ({ loggedInUser, onLogout }) => {
   const [error, setError] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState(null);
 
-
   const fetchData = async () => {
     try {
       const [pRes, aRes] = await Promise.all([
-        axios.get("/api/patients/all"),
-        axios.get("/api/appointments/all"),
+        axios.get("/api/patients/all", {
+          headers: { username: user.username }, // ✅ send username
+        }),
+        axios.get("/api/appointments/all", {
+          headers: { username: user.username }, // ✅ send username
+        }),
       ]);
       setPatients(pRes.data || []);
       setAppointments(aRes.data || []);
@@ -452,12 +512,28 @@ const Dashboard = ({ loggedInUser, onLogout }) => {
 
   return (
     <div style={{ display: "flex" }}>
-      <Sidebar activeSection={activeSection} setActiveSection={setActiveSection} />
+      <Sidebar
+        activeSection={activeSection}
+        setActiveSection={setActiveSection}
+      />
 
-      <div className="dashboard-container" style={{ marginLeft: "240px", padding: "30px", width: "100%" }}>
-        <div className="dashboard-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-          <h2>Welcome, {loggedInUser}</h2>
-          <button onClick={onLogout} className="logout-button">Logout</button>
+      <div
+        className="dashboard-container"
+        style={{ marginLeft: "240px", padding: "30px", width: "100%" }}
+      >
+        <div
+          className="dashboard-header"
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "20px",
+          }}
+        >
+          <h2>Welcome, {user.username}</h2> {/* ✅ replaced loggedInUser */}
+          <button onClick={onLogout} className="logout-button">
+            Logout
+          </button>
         </div>
 
         {activeSection === "home" && (
@@ -468,17 +544,25 @@ const Dashboard = ({ loggedInUser, onLogout }) => {
             setSelectedStatus={setSelectedStatus}
           />
         )}
+
         {activeSection === "patients" && (
-          <PatientsSection patients={filteredPatients} fetchData={fetchData} />
+          <PatientsSection
+            patients={filteredPatients}
+            fetchData={fetchData}
+          />
         )}
+
         {activeSection === "appointments" && (
-          <AppointmentsSection patients={patients} appointments={appointments} fetchData={fetchData} />
+          <AppointmentsSection
+            patients={patients}
+            appointments={appointments}
+            fetchData={fetchData}
+          />
         )}
       </div>
     </div>
   );
 };
-
 
 <AppointmentSection />
 

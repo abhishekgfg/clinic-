@@ -1,9 +1,22 @@
 const Appointment = require("../Models/Appointment");
 
-// Add new appointment
 exports.addAppointment = async (req, res) => {
+  const { patientId, date, time, notes } = req.body;
+  const username = req.headers.username;
+
+  if (!patientId || !username || !date || !time) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
   try {
-    const newAppointment = new Appointment(req.body);
+    const newAppointment = new Appointment({
+      patientId,
+      date,
+      time,
+      notes,
+      createdBy: username,
+    });
+
     await newAppointment.save();
     res.status(201).json({ message: "Appointment added" });
   } catch (err) {
@@ -11,17 +24,18 @@ exports.addAppointment = async (req, res) => {
   }
 };
 
-// Get all appointments
 exports.getAllAppointments = async (req, res) => {
   try {
-    const appointments = await Appointment.find().populate("patientId");
+    const username = req.headers.username;
+    const query = username === "abhi" ? {} : { createdBy: username };
+
+    const appointments = await Appointment.find(query).populate("patientId");
     res.json(appointments);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch appointments" });
   }
 };
 
-// Update status
 exports.updateAppointmentStatus = async (req, res) => {
   try {
     const { status } = req.body;
@@ -40,11 +54,9 @@ exports.updateAppointmentStatus = async (req, res) => {
   }
 };
 
-// ✅ Delete — only if username is 'abhi'
 exports.deleteAppointment = async (req, res) => {
   try {
     const username = req.headers.username;
-
     if (username !== "abhi") {
       return res.status(403).json({ error: "Access Denied: Only abhi can delete." });
     }
