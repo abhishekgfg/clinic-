@@ -6,7 +6,7 @@ const {
   updateAppointmentStatus,
   deleteAppointment,
   rescheduleAppointment,
-} = require("../controllers/appointmentController");
+} = require("../Controllers/appointmentController");
 
 router.post("/add", addAppointment);
 router.get("/all", getAllAppointments);
