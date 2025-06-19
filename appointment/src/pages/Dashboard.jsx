@@ -349,8 +349,8 @@ const PatientsSection = ({ patients, fetchData }) => {
 // Function to generate 30-min time ranges from 11:00 AM to 8:00 PM
 const generateTimeSlots = () => {
   const slots = [];
-  const start = 11 * 60; // 11:00 AM in minutes
-  const end = 20 * 60;   // 8:00 PM in minutes
+  const start = 11 * 60; // 11:00 AM
+  const end = 20 * 60;   // 8:00 PM
 
   for (let mins = start; mins < end; mins += 30) {
     const format = (totalMins) => {
@@ -368,8 +368,6 @@ const generateTimeSlots = () => {
   return slots;
 };
 
-
-
 const AppointmentsSection = ({ patients, appointments, fetchData }) => {
   const { user } = useAuth();
   const timeSlots = generateTimeSlots();
@@ -384,10 +382,10 @@ const AppointmentsSection = ({ patients, appointments, fetchData }) => {
     time: "",
     notes: "",
     location: "",
-  message: "",
+    message: "",
   });
 
-  const today = new Date().toISOString().split("T")[0]; // For min date
+  const today = new Date().toISOString().split("T")[0]; // min date for date input
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -402,14 +400,30 @@ const AppointmentsSection = ({ patients, appointments, fetchData }) => {
       return alert("Please fill all required fields");
     }
 
+    // ❌ Check if the same time slot is already booked
+    const isSlotTaken = appointments.some(
+      (appt) => appt.date === date && appt.time === time
+    );
+
+    if (isSlotTaken) {
+      return alert("This time slot is already booked. Please choose another.");
+    }
+
     try {
       await axios.post("/api/appointments/add", formData, {
         headers: {
           username: user.username,
         },
       });
-      setFormData({ patientId: "", date: "", time: "", notes: "" });
-      fetchData();
+      setFormData({
+        patientId: "",
+        date: "",
+        time: "",
+        notes: "",
+        location: "",
+        message: "",
+      });
+      fetchData(); // refresh appointment list
     } catch (error) {
       console.error("Appointment error:", error.response?.data || error.message);
       alert("Failed to schedule appointment");
@@ -428,11 +442,12 @@ const AppointmentsSection = ({ patients, appointments, fetchData }) => {
             required
           >
             <option value="">Select Patient</option>
-            {eligiblePatients.map((p) => (
-              <option key={p._id} value={p._id}>
-                {p.name}
-              </option>
-            ))}
+          {eligiblePatients.map((p) => (
+  <option key={p._id} value={p._id}>
+    {p.name} ({p.contact})
+  </option>
+))}
+
           </select>
 
           <input
@@ -464,28 +479,28 @@ const AppointmentsSection = ({ patients, appointments, fetchData }) => {
             value={formData.notes}
             onChange={handleChange}
           ></textarea>
+
           <input
-  type="text"
-  name="location"
-  placeholder="Enter location"
-  value={formData.location}
-  onChange={handleChange}
-  required
-/>
+            type="text"
+            name="location"
+            placeholder="Enter location"
+            value={formData.location}
+            onChange={handleChange}
+            required
+          />
 
-<textarea
-  name="message"
-  placeholder="Enter message for patient"
-  value={formData.message}
-  onChange={handleChange}
-/>
-
+          <textarea
+            name="message"
+            placeholder="Enter message for patient"
+            value={formData.message}
+            onChange={handleChange}
+          />
 
           <button type="submit">➕ Schedule</button>
         </form>
       </div>
 
-      {/* Appointment list table */}
+      {/* Appointment list */}
       <AppointmentTable appointments={appointments} />
     </div>
   );
@@ -514,15 +529,16 @@ const DashboardHome = ({ patients, appointments, setActiveSection, setSelectedSt
     (app) => app.status === "Rescheduled"
   ).length;
 
-  const handleStatusClick = (status) => {
+  // 🔄 Updated function to support patient or appointment section switching
+  const handleStatusClick = (status, section = "patients") => {
     setSelectedStatus(status);
-    setActiveSection("patients");
+    setActiveSection(section);
   };
-  const handleRescheduledAppointmentsClick = () => {
-  setSelectedStatus("Rescheduled");
-  setActiveSection("appointments");
-};
 
+  const handleRescheduledAppointmentsClick = () => {
+    setSelectedStatus("Rescheduled");
+    setActiveSection("appointments");
+  };
 
   return (
     <>
@@ -532,43 +548,82 @@ const DashboardHome = ({ patients, appointments, setActiveSection, setSelectedSt
       </div>
 
       <div className="stats-overview">
-        <div className="stat-card" onClick={() => handleStatusClick(null)}>
+        <div
+          className="stat-card"
+          onClick={() => handleStatusClick(null)}
+          style={{ backgroundColor: "#f0f4f8", color: "#333" }}
+        >
           <h3>Total Patients</h3>
           <p>{patients.length}</p>
         </div>
-        <div className="stat-card" onClick={() => setActiveSection("appointments")}>
+
+        <div
+          className="stat-card"
+          onClick={() => setActiveSection("appointments")}
+          style={{ backgroundColor: "#e6f7ff", color: "#003366" }}
+        >
           <h3>Total Appointments</h3>
           <p>{appointments.length}</p>
         </div>
-        <div className="stat-card status-in-progress" onClick={() => handleStatusClick("In Progress")}>
+
+        <div
+          className="stat-card"
+          onClick={() => handleStatusClick("In Progress")}
+          style={{ backgroundColor: "#fff3cd", color: "#856404" }}
+        >
           <h3>In Progress</h3>
           <p>{statusCounts["In Progress"]}</p>
         </div>
-        <div className="stat-card status-call" onClick={() => handleStatusClick("Call")}>
+
+        <div
+          className="stat-card"
+          onClick={() => handleStatusClick("Call")}
+          style={{ backgroundColor: "#d1ecf1", color: "#0c5460" }}
+        >
           <h3>Call</h3>
           <p>{statusCounts["Call"]}</p>
         </div>
-        <div className="stat-card status-consult" onClick={() => handleStatusClick("Ready for Consultation")}>
+
+        <div
+          className="stat-card"
+          onClick={() => handleStatusClick("Ready for Consultation")}
+          style={{ backgroundColor: "#d4edda", color: "#155724" }}
+        >
           <h3>Ready for Consultation</h3>
           <p>{statusCounts["Ready for Consultation"]}</p>
         </div>
-        <div className="stat-card status-payment" onClick={() => handleStatusClick("Payment Done")}>
+
+        <div
+          className="stat-card"
+          onClick={() => handleStatusClick("Payment Done")}
+          style={{ backgroundColor: "#cce5ff", color: "#004085" }}
+        >
           <h3>Payment Done</h3>
           <p>{statusCounts["Payment Done"]}</p>
         </div>
-        <div className="stat-card status-scheduled" onClick={() => handleStatusClick("Scheduled")}>
+
+        <div
+          className="stat-card"
+          onClick={() => handleStatusClick("Scheduled", "appointments")} // ✅ Updated here
+          style={{ backgroundColor: "#ffe8cc", color: "#663c00" }}
+        >
           <h3>Scheduled</h3>
           <p>{statusCounts["Scheduled"]}</p>
         </div>
-        <div className="stat-card status-rescheduled" onClick={handleRescheduledAppointmentsClick}>
-  <h3>Rescheduled Appointments</h3>
-  <p>{rescheduledAppointmentsCount}</p>
-</div>
 
+        <div
+          className="stat-card"
+          onClick={handleRescheduledAppointmentsClick}
+          style={{ backgroundColor: "#f8d7da", color: "#721c24" }}
+        >
+          <h3>Rescheduled Appointments</h3>
+          <p>{rescheduledAppointmentsCount}</p>
+        </div>
       </div>
     </>
   );
 };
+
 
 
 const Dashboard = ({ onLogout }) => {
@@ -635,9 +690,9 @@ const Dashboard = ({ onLogout }) => {
           }}
         >
           <h2>Welcome, {user.username}</h2>
-          <button onClick={onLogout} className="logout-button">
+          {/* <button onClick={onLogout} className="logout-button">
             Logout
-          </button>
+          </button> */}
         </div>
 
         {activeSection === "home" && (

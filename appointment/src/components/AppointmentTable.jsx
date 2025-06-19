@@ -4,7 +4,6 @@ import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
@@ -13,7 +12,8 @@ const statusOptions = ["Scheduled", "Cancelled", "Rescheduled"];
 const AppointmentTable = ({ appointments }) => {
   const [localAppointments, setLocalAppointments] = useState([]);
   const { user } = useAuth();
-  const [rescheduleInfo, setRescheduleInfo] = useState({}); // { [id]: { date, time, location } }
+  const [rescheduleInfo, setRescheduleInfo] = useState({});
+  const [filterStatus, setFilterStatus] = useState(""); // 👈 new filter
 
   useEffect(() => {
     setLocalAppointments(appointments);
@@ -44,12 +44,20 @@ const AppointmentTable = ({ appointments }) => {
       return;
     }
 
+    const isSlotTaken = localAppointments.some(
+      (app) => app._id !== id && app.date === date && app.time === time
+    );
+    if (isSlotTaken) {
+      alert("This time slot is already booked. Please choose another.");
+      return;
+    }
+
     try {
       await axios.patch(`/api/appointments/${id}/reschedule`, {
         date,
         time,
         location,
-        status: "Rescheduled"
+        status: "Rescheduled",
       });
 
       setLocalAppointments((prev) =>
@@ -85,7 +93,6 @@ const AppointmentTable = ({ appointments }) => {
   const exportToPDF = () => {
     const doc = new jsPDF();
     doc.text("Appointment Records", 14, 10);
-
     const tableData = localAppointments.map((app) => [
       app.patientId?.name || "N/A",
       app.date,
@@ -95,13 +102,10 @@ const AppointmentTable = ({ appointments }) => {
       app.notes || "N/A",
       app.status,
     ]);
-
     autoTable(doc, {
-  head: [["Patient", "Date", "Time", "Location", "Message", "Notes", "Status"]],
-  body: tableData,
-});
-
-
+      head: [["Patient", "Date", "Time", "Location", "Message", "Notes", "Status"]],
+      body: tableData,
+    });
     doc.save("appointments.pdf");
   };
 
@@ -138,6 +142,23 @@ const AppointmentTable = ({ appointments }) => {
         <button onClick={exportToExcel} className="export-button">Export to Excel</button>
       </div>
 
+      {/* 👇 Filter Dropdown */}
+      <div style={{ marginBottom: "15px" }}>
+        <label>Status Filter: </label>
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+          style={{ padding: "6px", marginLeft: "8px" }}
+        >
+          <option value="">All</option>
+          {statusOptions.map((status) => (
+            <option key={status} value={status}>
+              {status}
+            </option>
+          ))}
+        </select>
+      </div>
+
       <div className="appointment-table-container">
         <table className="appointment-table">
           <thead>
@@ -153,124 +174,135 @@ const AppointmentTable = ({ appointments }) => {
             </tr>
           </thead>
           <tbody>
-            {localAppointments.length === 0 ? (
+            {localAppointments.filter((app) => !filterStatus || app.status === filterStatus).length === 0 ? (
               <tr>
                 <td colSpan="8" style={{ textAlign: "center" }}>
                   No appointments found
                 </td>
               </tr>
             ) : (
-              localAppointments.map((app) => (
-                <tr key={app._id}>
-                  <td>{app.patientId?.name || "N/A"}</td>
-                  <td>{app.date}</td>
-                  <td>{app.time}</td>
-                  <td>{app.location || "N/A"}</td>
-                  <td>{app.message || "N/A"}</td>
-                  <td>{app.notes || "N/A"}</td>
-                  <td>
-                    <select
-                      className="status-dropdown"
-                      value={rescheduleInfo[app._id] ? "Rescheduled" : app.status}
-                      onChange={(e) => handleStatusChange(app._id, e.target.value)}
-                    >
-                      {statusOptions.map((status) => (
-                        <option key={status} value={status}>
-                          {status}
-                        </option>
-                      ))}
-                    </select>
-
-                    {rescheduleInfo[app._id] && (
-                      <div className="reschedule-inputs" style={{ marginTop: "10px" }}>
-                        <input
-                          type="date"
-                          min={new Date().toISOString().split("T")[0]}
-                          value={rescheduleInfo[app._id].date}
-                          onChange={(e) =>
-                            setRescheduleInfo((prev) => ({
-                              ...prev,
-                              [app._id]: {
-                                ...prev[app._id],
-                                date: e.target.value,
-                              },
-                            }))
-                          }
-                        />
-
-                        <select
-                          value={rescheduleInfo[app._id].time}
-                          onChange={(e) =>
-                            setRescheduleInfo((prev) => ({
-                              ...prev,
-                              [app._id]: {
-                                ...prev[app._id],
-                                time: e.target.value,
-                              },
-                            }))
-                          }
-                          style={{ marginLeft: "8px", padding: "6px" }}
-                        >
-                          <option value="">Select time</option>
-                          <option value="11:00 AM - 11:30 AM">11:00 AM - 11:30 AM</option>
-                          <option value="11:30 AM - 12:00 PM">11:30 AM - 12:00 PM</option>
-                          <option value="12:00 PM - 12:30 PM">12:00 PM - 12:30 PM</option>
-                          <option value="12:30 PM - 01:00 PM">12:30 PM - 01:00 PM</option>
-                          <option value="01:00 PM - 01:30 PM">01:00 PM - 01:30 PM</option>
-                          <option value="01:30 PM - 02:00 PM">01:30 PM - 02:00 PM</option>
-                          <option value="02:00 PM - 02:30 PM">02:00 PM - 02:30 PM</option>
-                          <option value="02:30 PM - 03:00 PM">02:30 PM - 03:00 PM</option>
-                          <option value="03:00 PM - 03:30 PM">03:00 PM - 03:30 PM</option>
-                          <option value="03:30 PM - 04:00 PM">03:30 PM - 04:00 PM</option>
-                          <option value="04:00 PM - 04:30 PM">04:00 PM - 04:30 PM</option>
-                          <option value="04:30 PM - 05:00 PM">04:30 PM - 05:00 PM</option>
-                          <option value="05:00 PM - 05:30 PM">05:00 PM - 05:30 PM</option>
-                          <option value="05:30 PM - 06:00 PM">05:30 PM - 06:00 PM</option>
-                          <option value="06:00 PM - 06:30 PM">06:00 PM - 06:30 PM</option>
-                          <option value="06:30 PM - 07:00 PM">06:30 PM - 07:00 PM</option>
-                          <option value="07:00 PM - 07:30 PM">07:00 PM - 07:30 PM</option>
-                          <option value="07:30 PM - 08:00 PM">07:30 PM - 08:00 PM</option>
-                        </select>
-
-                        <input
-                          type="text"
-                          placeholder="Enter location"
-                          value={rescheduleInfo[app._id].location}
-                          onChange={(e) =>
-                            setRescheduleInfo((prev) => ({
-                              ...prev,
-                              [app._id]: {
-                                ...prev[app._id],
-                                location: e.target.value,
-                              },
-                            }))
-                          }
-                          style={{ marginLeft: "8px", padding: "6px", marginTop: "8px" }}
-                        />
-
-                        <button
-                          className="reschedule-button"
-                          onClick={() => handleRescheduleSubmit(app._id)}
-                          style={{ marginLeft: "10px" }}
-                        >
-                          Reschedule
-                        </button>
-                      </div>
-                    )}
-                  </td>
-
-                  {user.role === "admin" && (
+              localAppointments
+                .filter((app) => !filterStatus || app.status === filterStatus)
+                .map((app) => (
+                  <tr key={app._id}>
                     <td>
-                      <button
-                        className="delete-button"
-                        onClick={() => handleDelete(app._id)}
-                      >
-                        Delete
-                      </button>
+                      {app.patientId?.name || "N/A"}{" "}
+                      {app.patientId?.contact ? `(${app.patientId.contact})` : ""}
                     </td>
-                  )}
-                </tr>
-              ))
+                    <td>{app.date}</td>
+                    <td>{app.time}</td>
+                    <td>{app.location || "N/A"}</td>
+                    <td>{app.message || "N/A"}</td>
+                    <td>{app.notes || "N/A"}</td>
+                    <td>
+                      <select
+                        className="status-dropdown"
+                        value={rescheduleInfo[app._id] ? "Rescheduled" : app.status}
+                        onChange={(e) => handleStatusChange(app._id, e.target.value)}
+                      >
+                        {statusOptions.map((status) => (
+                          <option key={status} value={status}>
+                            {status}
+                          </option>
+                        ))}
+                      </select>
+
+                      {rescheduleInfo[app._id] && (
+                        <div className="reschedule-inputs" style={{ marginTop: "10px" }}>
+                          <input
+                            type="date"
+                            min={new Date().toISOString().split("T")[0]}
+                            value={rescheduleInfo[app._id].date}
+                            onChange={(e) =>
+                              setRescheduleInfo((prev) => ({
+                                ...prev,
+                                [app._id]: {
+                                  ...prev[app._id],
+                                  date: e.target.value,
+                                },
+                              }))
+                            }
+                          />
+
+                          <select
+                            value={rescheduleInfo[app._id].time}
+                            onChange={(e) =>
+                              setRescheduleInfo((prev) => ({
+                                ...prev,
+                                [app._id]: {
+                                  ...prev[app._id],
+                                  time: e.target.value,
+                                },
+                              }))
+                            }
+                            style={{ marginLeft: "8px", padding: "6px" }}
+                          >
+                            <option value="">Select time</option>
+                            {[
+                              "11:00 AM - 11:30 AM",
+                              "11:30 AM - 12:00 PM",
+                              "12:00 PM - 12:30 PM",
+                              "12:30 PM - 01:00 PM",
+                              "01:00 PM - 01:30 PM",
+                              "01:30 PM - 02:00 PM",
+                              "02:00 PM - 02:30 PM",
+                              "02:30 PM - 03:00 PM",
+                              "03:00 PM - 03:30 PM",
+                              "03:30 PM - 04:00 PM",
+                              "04:00 PM - 04:30 PM",
+                              "04:30 PM - 05:00 PM",
+                              "05:00 PM - 05:30 PM",
+                              "05:30 PM - 06:00 PM",
+                              "06:00 PM - 06:30 PM",
+                              "06:30 PM - 07:00 PM",
+                              "07:00 PM - 07:30 PM",
+                              "07:30 PM - 08:00 PM",
+                            ].map((slot) => (
+                              <option key={slot} value={slot}>
+                                {slot}
+                              </option>
+                            ))}
+                          </select>
+
+                          <input
+                            type="text"
+                            placeholder="Enter location"
+                            value={rescheduleInfo[app._id].location}
+                            onChange={(e) =>
+                              setRescheduleInfo((prev) => ({
+                                ...prev,
+                                [app._id]: {
+                                  ...prev[app._id],
+                                  location: e.target.value,
+                                },
+                              }))
+                            }
+                            style={{ marginLeft: "8px", padding: "6px", marginTop: "8px" }}
+                          />
+
+                          <button
+                            className="reschedule-button"
+                            onClick={() => handleRescheduleSubmit(app._id)}
+                            style={{ marginLeft: "10px" }}
+                          >
+                            Reschedule
+                          </button>
+                        </div>
+                      )}
+                    </td>
+
+                    {user.role === "admin" && (
+                      <td>
+                        <button
+                          className="delete-button"
+                          onClick={() => handleDelete(app._id)}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    )}
+                  </tr>
+                ))
             )}
           </tbody>
         </table>
