@@ -8,8 +8,9 @@ const {
   rescheduleAppointment,
 } = require("../Controllers/appointmentController");
 
-router.post("https://clinic-2uu2.onrender.com/api/appointments/add", addAppointment);
-router.get("https://clinic-2uu2.onrender.com/api/patients/all", getAllAppointments);
+// ✅ Use relative paths only
+router.post("/add", addAppointment);                 // POST /api/appointments/add
+router.get("/all", getAllAppointments);              // GET  /api/appointments/all
 router.patch("/:id/status", updateAppointmentStatus);
 router.delete("/:id", deleteAppointment);
 router.patch("/:id/reschedule", rescheduleAppointment);
