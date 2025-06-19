@@ -1,12 +1,11 @@
-// server.js
-
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
 
-const patientRoutes = require("./Routes/patientRoute");
-const appointmentRoutes = require("./Routes/appointmentRoute"); // ✅ Fix filename (no "s")
+// ✅ Use correct paths and consistent casing
+const patientRoutes = require("./Routes/patientRoutes");
+const appointmentRoutes = require("./Routes/appointmentRoutes");
 
 const app = express();
 
@@ -14,7 +13,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Connect to MongoDB
+// MongoDB connection
 mongoose
   .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
@@ -23,11 +22,10 @@ mongoose
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
-// Routes
-app.use("/api/patients", patientRoutes);         // ✅ Fix variable name
-app.use("/api/appointments", appointmentRoutes); // ✅ Fix variable name
+// ✅ Use correct route variables
+app.use("/api/patients", patientRoutes);
+app.use("/api/appointments", appointmentRoutes);
 
-// Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
