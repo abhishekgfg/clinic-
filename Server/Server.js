@@ -1,4 +1,4 @@
-// server.js (or app.js)
+// server.js
 
 const express = require("express");
 const mongoose = require("mongoose");
@@ -6,7 +6,7 @@ const cors = require("cors");
 require("dotenv").config();
 
 const patientRoutes = require("./Routes/patientRoutes");
-const appointmentRoutes = require("./routes/appointmentRoutes");
+const appointmentRoutes = require("./Routes/appointmentRoute"); // ✅ Fix filename (no "s")
 
 const app = express();
 
@@ -24,8 +24,8 @@ mongoose
   .catch((err) => console.error("MongoDB connection error:", err));
 
 // Routes
-app.use("/api/patients", patientRoutes);
-app.use("/api/appointments", appointmentRoutes);
+app.use("/api/patients", patientRoutes);         // ✅ Fix variable name
+app.use("/api/appointments", appointmentRoutes); // ✅ Fix variable name
 
 // Start server
 const PORT = process.env.PORT || 5000;
