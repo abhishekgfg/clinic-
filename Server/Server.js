@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
 
-const patientRoutes = require("./Routes/patientRoutes");
+const patientRoutes = require("./Routes/patientRoute");
 const appointmentRoutes = require("./Routes/appointmentRoute"); // ✅ Fix filename (no "s")
 
 const app = express();
