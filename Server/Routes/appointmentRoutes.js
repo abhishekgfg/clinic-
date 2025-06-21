@@ -1,3 +1,4 @@
+// routes/appointmentRoutes.js
 const express = require("express");
 const router = express.Router();
 const {
@@ -5,14 +6,13 @@ const {
   getAllAppointments,
   updateAppointmentStatus,
   deleteAppointment,
-  rescheduleAppointment,
-} = require("../Controllers/appointmentController");
+  rescheduleAppointment
+} = require("../controllers/appointmentController");
 
-// ✅ Use relative paths only
-router.post("/add", addAppointment);                 // POST /api/appointments/add
-router.get("/all", getAllAppointments);              // GET  /api/appointments/all
+router.post("/add", addAppointment);
+router.get("/all", getAllAppointments);
 router.patch("/:id/status", updateAppointmentStatus);
-router.delete("/:id", deleteAppointment);
 router.patch("/:id/reschedule", rescheduleAppointment);
+router.delete("/:id", deleteAppointment);
 
 module.exports = router;

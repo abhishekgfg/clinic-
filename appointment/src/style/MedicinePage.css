@@ -1,0 +1,84 @@
+.medicine-dept-page {
+  display: flex;
+  justify-content: center;
+  background: #f4f6f8;
+  min-height: 100vh;
+}
+
+.medicine-dept-content {
+  width: 1000px;
+  margin-left: 250px;
+  padding: 20px;
+  overflow-x: auto;
+  background: #f8f9fc;
+}
+
+.medicine-dept-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 20px;
+}
+
+.medicine-dept-search {
+  width: 100%;
+  max-width: 300px;
+  padding: 10px 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.medicine-dept-table-wrapper {
+  overflow-x: auto;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.medicine-dept-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1000px;
+}
+
+.medicine-dept-table th,
+.medicine-dept-table td {
+  padding: 12px;
+  text-align: center;
+  border: 1px solid #e2e8f0;
+  font-size: 14px;
+}
+
+.medicine-dept-table th {
+  background-color: #38a169;
+  color: white;
+  font-weight: bold;
+}
+
+.medicine-dept-table tr:nth-child(even) {
+  background-color: #f7fafc;
+}
+
+/* Responsive layout */
+@media screen and (max-width: 768px) {
+  .medicine-dept-content {
+    width: 100%;
+    margin: 20px 10px 0 10px;
+    padding: 10px;
+  }
+
+  .medicine-dept-title {
+    font-size: 22px;
+  }
+
+  .medicine-dept-search {
+    width: 100%;
+  }
+
+  .medicine-dept-table {
+    font-size: 12px;
+    min-width: 900px;
+  }
+}

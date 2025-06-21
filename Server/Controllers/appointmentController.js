@@ -1,4 +1,5 @@
-const Appointment = require("../Models/Appointment");
+// controllers/appointmentController.js
+const Appointment = require("../models/Appointment");
 
 // Add new appointment
 exports.addAppointment = async (req, res) => {
@@ -27,7 +28,7 @@ exports.addAppointment = async (req, res) => {
   }
 };
 
-// ✅ Get all appointments (visible to all users)
+// Get all appointments
 exports.getAllAppointments = async (req, res) => {
   try {
     const appointments = await Appointment.find().populate("patientId");
@@ -40,8 +41,10 @@ exports.getAllAppointments = async (req, res) => {
 // Update appointment status
 exports.updateAppointmentStatus = async (req, res) => {
   try {
-    const { status } = req.body;
+    let { status } = req.body;
     if (!status) return res.status(400).json({ error: "Status is required" });
+
+    status = status.trim(); // ✅ Remove spaces
 
     const updated = await Appointment.findByIdAndUpdate(
       req.params.id,
@@ -56,13 +59,12 @@ exports.updateAppointmentStatus = async (req, res) => {
     res.status(500).json({ error: "Failed to update status" });
   }
 };
-
-// ✅ Delete appointment (admin-only)
+// Delete appointment (admin only)
 exports.deleteAppointment = async (req, res) => {
   try {
-    const username = req.headers.username;
-    if (username !== "abhi") {
-      return res.status(403).json({ error: "Access Denied: Only abhi can delete." });
+    const role = req.headers.role;
+    if (role !== "admin") {
+      return res.status(403).json({ error: "Access Denied: Only admin can delete." });
     }
 
     const found = await Appointment.findById(req.params.id);
@@ -75,7 +77,7 @@ exports.deleteAppointment = async (req, res) => {
   }
 };
 
-// Reschedule appointment (update date, time, and optionally location/message)
+// Reschedule appointment
 exports.rescheduleAppointment = async (req, res) => {
   try {
     const { date, time, location, message, status } = req.body;

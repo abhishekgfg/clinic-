@@ -4,7 +4,15 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Login from "./components/Login";
 import Dashboard from "./pages/Dashboard";
-import Patients from "./pages/Patients";
+import PatientsPage from "./pages/PatientsPage";
+import AppointmentsPage from "./pages/AppointmentsPage";
+import AssistantDoctorPage from "./pages/AssistantDoctorPage";
+import AccountPage from "./pages/AccountPage";
+import MedicinePage from "./pages/MedicinePage";
+
+
+
+import SignupPage from "./pages/SignupPage";
 
 const ProtectedRoute = ({ children }) => {
   const { user } = useAuth();
@@ -18,9 +26,7 @@ const AppRoutes = () => {
     <Routes>
       <Route
         path="/"
-        element={
-          user ? <Navigate to="/dashboard" /> : <Login />
-        }
+        element={user ? <Navigate to="/dashboard" /> : <Login />}
       />
       <Route
         path="/dashboard"
@@ -31,13 +37,58 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/patients"
+  path="/patients"
+  element={
+    <ProtectedRoute>
+      <PatientsPage /> {/* not Patients */}
+    </ProtectedRoute>
+  }
+/>
+ <Route
+        path="/assistant-doctor" // ✅ Add this route
         element={
           <ProtectedRoute>
-            <Patients />
+            <AssistantDoctorPage />
           </ProtectedRoute>
         }
       />
+
+      <Route
+  path="/account"
+  element={
+    <ProtectedRoute>
+      <AccountPage />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/medicine"
+  element={
+    <ProtectedRoute>
+      <MedicinePage />
+    </ProtectedRoute>
+  }
+/>
+
+
+
+      <Route
+        path="/signup"
+        element={
+          <ProtectedRoute>
+            <SignupPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+  path="/appointments"
+  element={
+    <ProtectedRoute>
+      <AppointmentsPage />
+    </ProtectedRoute>
+  }
+/>
+
     </Routes>
   );
 };

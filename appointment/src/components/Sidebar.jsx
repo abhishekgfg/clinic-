@@ -1,25 +1,54 @@
-// src/components/Sidebar.jsx
 import React, { useState } from "react";
-import { FaHome, FaUserFriends, FaCalendarAlt, FaSignOutAlt, FaBars } from "react-icons/fa";
+import {
+  FaHome,
+  FaUserFriends,
+  FaCalendarAlt,
+  FaSignOutAlt,
+  FaBars,
+  FaUserPlus,
+  FaUserMd,
+  FaFileInvoiceDollar,
+  FaCapsules,
+  FaEnvelopeOpenText,
+  FaBox,
+  FaTruck
+} from "react-icons/fa"; // add more icons as needed
 import "../style/Sidebar.css";
-import { useAuth } from "../context/AuthContext"; // ✅ import useAuth
-import { useNavigate } from "react-router-dom";   // ✅ for redirect
+import { useAuth } from "../context/AuthContext";
+import { useNavigate, useLocation } from "react-router-dom";
 
-const Sidebar = ({ activeSection, setActiveSection }) => {
+const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const { logout } = useAuth();       // ✅ get logout function
-  const navigate = useNavigate();     // ✅ for redirect after logout
+  const { logout, user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const menuItems = [
-    { name: "Dashboard", icon: <FaHome />, key: "home" },
-    { name: "Patients", icon: <FaUserFriends />, key: "patients" },
-    { name: "Appointments", icon: <FaCalendarAlt />, key: "appointments" },
-    { name: "Logout", icon: <FaSignOutAlt />, key: "logout" },
+  const baseMenuItems = [
+    { name: "Dashboard", icon: <FaHome />, path: "/dashboard" },
+    { name: "Patients", icon: <FaUserFriends />, path: "/patients" },
+    { name: "Appointments", icon: <FaCalendarAlt />, path: "/appointments" },
+    { name: "Assistant Doctor", icon: <FaUserMd />, path: "/assistant-doctor" },
+    { name: "Account", icon: <FaFileInvoiceDollar />, path: "/account" },
+    { name: "Medicine", icon: <FaCapsules />, path: "/medicine" },
+    { name: "Chithi", icon: <FaEnvelopeOpenText />, path: "/chithi" },
+    { name: "Packoing", icon: <FaBox />, path: "/packoing" },
+    { name: "Courier", icon: <FaTruck />, path: "/courier" },
   ];
 
-  const handleLogout = () => {
-    logout();              // ✅ clear auth state + localStorage
-    navigate("/login");    // ✅ redirect to login
+  const menuItems =
+    user?.role === "admin"
+      ? [...baseMenuItems, { name: "Signup", icon: <FaUserPlus />, path: "/signup" }]
+      : baseMenuItems;
+
+  menuItems.push({ name: "Logout", icon: <FaSignOutAlt />, path: "/logout" });
+
+  const handleClick = (path) => {
+    if (path === "/logout") {
+      logout();
+      navigate("/login");
+    } else {
+      navigate(path);
+    }
   };
 
   return (
@@ -31,15 +60,9 @@ const Sidebar = ({ activeSection, setActiveSection }) => {
       <ul className="nav-menu">
         {menuItems.map((item) => (
           <li
-            key={item.key}
-            className={activeSection === item.key ? "active" : ""}
-            onClick={() => {
-              if (item.key === "logout") {
-                handleLogout(); // ✅ call the correct logout
-              } else {
-                setActiveSection(item.key);
-              }
-            }}
+            key={item.path}
+            className={location.pathname === item.path ? "active" : ""}
+            onClick={() => handleClick(item.path)}
             style={{ cursor: "pointer" }}
           >
             <span className="icon">{item.icon}</span>

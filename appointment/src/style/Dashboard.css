@@ -6,6 +6,8 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+
+
 /* Header */
 .dashboard-header {
   text-align: center;
@@ -21,7 +23,6 @@
   font-size: 1.1rem;
   color: #666;
 }
-
 
 .section-heading {
   display: flex;
@@ -49,7 +50,6 @@
   height: 28px;
   margin-right: 12px;
 }
-
 
 .edit-btn,
 .delete-btn {
@@ -81,7 +81,6 @@
   font-weight: 600;
   cursor: pointer;
 }
-
 
 .stat-card {
   background-color: #fff;
@@ -136,7 +135,6 @@
   border-left: 6px solid #9966ff;
 }
 
-
 .stat-card {
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -155,7 +153,6 @@
 }
 
 /* Appointments.css */
-
 .appointments-section {
   display: flex;
   flex-direction: column;
@@ -240,8 +237,6 @@
   padding: 20px;
 }
 
-
-
 .stat-card {
   flex: 1;
   background: #f8f9fa;
@@ -319,125 +314,6 @@
   width: 100%;
   overflow-x: auto;
 }
-
-/* Patients Table */
-.patients-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0 12px;
-  font-size: 15px;
-  font-family: 'Segoe UI', sans-serif;
-}
-
-.patients-table thead tr {
-  background-color: #007bff;
-  color: white;
-}
-
-.patients-table th,
-.patients-table td {
-  padding: 14px 18px;
-  text-align: left;
-  border-bottom: 1px solid #e2e2e2;
-}
-
-.patients-table tbody tr {
-  background-color: #f9f9f9;
-  transition: background-color 0.3s ease;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-}
-
-.patients-table tbody tr:hover {
-  background-color: #f0f8ff;
-}
-
-.patients-table .no-data {
-  text-align: center;
-  padding: 30px;
-  font-style: italic;
-  color: #999;
-}
-
-/* Status Badge Styling */
-.patient-status {
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-weight: bold;
-  display: inline-block;
-  text-align: center;
-  font-size: 13px;
-}
-
-.status-initial {
-  background-color: #e0f7fa;
-  color: #00796b;
-}
-
-.status-under-treatment {
-  background-color: #fff3e0;
-  color: #ef6c00;
-}
-
-.status-recovered {
-  background-color: #e8f5e9;
-  color: #388e3c;
-}
-
-.status-followup {
-  background-color: #ede7f6;
-  color: #5e35b1;
-}
-
-.status-critical {
-  background-color: #ffebee;
-  color: #c62828;
-}
-
-/* Add Patient Form */
-.add-patient-form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  align-items: flex-start;
-  margin-top: 15px;
-}
-
-.add-patient-form input {
-  flex: 1 1 200px;
-  padding: 10px 14px;
-  font-size: 14px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  background-color: #f9f9f9;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.add-patient-form input:focus {
-  border-color: #4caf50;
-  box-shadow: 0 0 6px rgba(76, 175, 80, 0.3);
-  background-color: #fff;
-  outline: none;
-}
-
-.add-patient-form button {
-  padding: 10px 18px;
-  background-color: #4caf50;
-  color: #fff;
-  font-weight: 600;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.add-patient-form button:hover {
-  background-color: #43a047;
-  transform: translateY(-1px);
-}
-
-/* Import Section */
 
 /* Loader / Error */
 .loader,
@@ -528,7 +404,7 @@
 
 /* Table responsiveness */
 @media (max-width: 768px) {
-  .patients-table, .appointment-table {
+  .appointment-table {
     display: block;
     overflow-x: auto;
     white-space: nowrap;
@@ -541,15 +417,14 @@
 
 /* Form responsiveness */
 @media (max-width: 768px) {
-  .appointment-form, .add-patient-form {
+  .appointment-form {
     flex-direction: column;
     width: 100%;
   }
   
   .appointment-form select,
   .appointment-form input,
-  .appointment-form textarea,
-  .add-patient-form input {
+  .appointment-form textarea {
     width: 100%;
   }
 }
@@ -593,6 +468,7 @@
   font-weight: bold;
   color: #222;
 }
+
 @media screen and (max-width: 768px) {
   .sidebar {
     position: fixed;
@@ -605,7 +481,6 @@
     justify-content: space-between;
     padding: 10px 1px;
     z-index: 1000;
-    
   }
 
   .logo {
@@ -651,81 +526,16 @@
   }
 }
 
-
-
 @media (max-width: 768px) {
-  .add-patient-form {
-    flex-direction: column;
-  }
-
-  .add-patient-form input,
-  .add-patient-form button {
-    width: 100%;
-  }
-
-  .edit-btn,
-  .delete-btn {
-    width: 100%;
-    margin-bottom: 5px;
-  }
-
-  .patients-table th,
-  .patients-table td {
-    font-size: 14px;
-    padding: 6px;
-  }
-}
-
-@media (max-width: 480px) {
-  .patients-table {
-    font-size: 12px;
-  }
-
-  .patients-table th,
-  .patients-table td {
-    padding: 4px;
-  }
-
-  .status-dropdown {
-    font-size: 12px;
-  }
-
-  .edit-btn,
-  .delete-btn {
-    font-size: 12px;
-  }
-}
-
-
-
-
-
-@media (max-width: 768px) {
-  .card{
+  .card {
     width:100%;
   }
-  .add-patient-form {
-    flex-direction: column;
-    width: 90%;
-    gap: 8px;
-  }
-
-  .add-patient-form input,
-  .add-patient-form textarea,
-  .add-patient-form select {
-    height: 36px;
-    padding: 6px 10px;
-    font-size: 13px;
-    margin-bottom: 8px;
-  }
-
-  
 }
 
 .card-wrapper {
   display: flex;
   justify-content: center;
-  align-items: flex-start; /* Or 'center' if you want full vertical center */
+  align-items: flex-start;
   padding: 20px;
 }
 
@@ -750,23 +560,6 @@
     max-width: 95%;
   }
 }
-
-@media (max-width: 480px) {
-  .add-patient-form input {
-    height: 32px;
-    padding: 4px 10px;
-    font-size: 13px;
-  }
-
-  .add-patient-form button {
-    height: 36px;
-    font-size: 14px;
-    padding: 6px 12px;
-  }
-}
-
-
-
 
 .import-section {
   margin-top: 30px;
@@ -821,8 +614,6 @@
   }
 }
 
-
-
 @media (max-width: 600px) {
   .stats-overview {
     display: grid;
@@ -845,7 +636,6 @@
   }
 }
 
-
 @media (max-width: 600px) {
   .table-wrapper {
     overflow-x: auto;
@@ -854,28 +644,16 @@
     border-radius: 8px;
   }
 
-  .patients-table {
+  .appointment-table {
     min-width: 500px;
     border-collapse: collapse;
   }
 
-  .patients-table th,
-  .patients-table td {
+  .appointment-table th,
+  .appointment-table td {
     padding: 8px;
     font-size: 13px;
     white-space: nowrap;
-  }
-
-  .status-dropdown {
-    font-size: 12px;
-    padding: 4px 6px;
-  }
-
-  .edit-btn,
-  .delete-btn {
-    font-size: 12px;
-    padding: 4px 6px;
-    margin: 2px;
   }
 
   .delete-selected-btn {
@@ -885,12 +663,9 @@
   }
 }
 
-
-
-
 /* Add to the very top of your CSS */
 html, body {
-  overflow-x: hidden; /* Prevent horizontal scrolling */
+  overflow-x: hidden;
   width: 100%;
   max-width: 100%;
 }
@@ -898,7 +673,7 @@ html, body {
 .dashboard-container {
   width: 100%;
   max-width: 100%;
-  box-sizing: border-box; /* Include padding in width calculation */
+  box-sizing: border-box;
 }
 
 /* For tables on mobile */
@@ -911,8 +686,6 @@ html, body {
     margin-left: -50vw;
     margin-right: -60vw;
   }
-  
-  
   
   /* Specifically target iOS devices */
   @supports (-webkit-touch-callout: none) {
@@ -928,14 +701,14 @@ html, body {
 
 /* Ensure cards don't cause overflow */
 .card {
-  max-width: calc(100% - 40px); /* Account for padding */
+  max-width: calc(100% - 40px);
   margin: 0 auto;
 }
 
 /* Fix for form elements causing overflow */
-.add-patient-form input,
-.add-patient-form select,
-.add-patient-form textarea {
+.appointment-form input,
+.appointment-form select,
+.appointment-form textarea {
   max-width: 100%;
   box-sizing: border-box;
 }

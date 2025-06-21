@@ -1,4 +1,3 @@
-/* src/style/Sidebar.css */
 .sidebar {
   position: fixed;
   left: 0;
@@ -10,6 +9,17 @@
   padding-top: 20px;
   transition: width 0.3s ease;
   z-index: 1000;
+  overflow-y: auto; /* ✅ Enable scrolling */
+  scrollbar-width: thin;
+  scrollbar-color: #57606f transparent;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+.sidebar::-webkit-scrollbar-thumb {
+  background-color: #57606f;
+  border-radius: 6px;
 }
 
 .sidebar.collapsed {
@@ -67,19 +77,17 @@
   display: none;
 }
 
+/* Responsive View */
 @media screen and (max-width: 768px) {
   .sidebar {
-    position: relative  ;
-    top: 0;
-    left: 0;
+    position: relative;
     height: auto;
     width: 100%;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     padding: 10px 15px;
-    z-index: 1000;
-  
+    overflow-y: visible; /* 🔄 Disable scroll in mobile view */
   }
 
   .logo {
@@ -96,6 +104,7 @@
     flex-direction: row;
     justify-content: space-around;
     width: 100%;
+    overflow-x: auto; /* ✅ Optional: scroll if too many items */
   }
 
   .nav-menu li {
@@ -119,7 +128,6 @@
     display: none;
   }
 
-  /* Push main content down to avoid overlap */
   body {
     padding-top: 60px;
   }
