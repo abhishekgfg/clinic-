@@ -1,7 +1,8 @@
+// controllers/accountController.js
 const AssistantDoctor = require("../models/AssistantDoctor");
 const Account = require("../models/Account");
 
-// ✅ Fetch joined data
+// ✅ Fetch joined data with all required fields
 exports.getAllAccountRecords = async (req, res) => {
   try {
     const assistants = await AssistantDoctor.find().sort({ createdAt: -1 });
@@ -13,10 +14,10 @@ exports.getAllAccountRecords = async (req, res) => {
         return {
           ...record.toObject(),
           referenceNumber: accountData?.referenceNumber || "",
-          details: accountData?.details || "",
-          medicineExplain: accountData?.medicineExplain || "",
-          nextFollowUp: accountData?.nextFollowUp || "",
           displayId: accountData?.displayId || record.displayId || "",
+          details: accountData?.details || record.details || "",
+          medicineExplain: accountData?.medicineExplain || record.medicineExplain || "",
+          nextFollowUp: accountData?.nextFollowUp || record.nextFollowUp || "",
         };
       })
     );
@@ -27,7 +28,6 @@ exports.getAllAccountRecords = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch account data" });
   }
 };
-
 // ✅ Update status
 exports.updateAccountStatus = async (req, res) => {
   try {

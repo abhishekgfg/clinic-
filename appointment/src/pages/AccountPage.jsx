@@ -144,8 +144,9 @@ const AccountPage = () => {
                     <td>{r.location}</td>
                     <td>{r.status}</td>
                     <td>{r.details || "-"}</td>
-                    <td>{r.medicineExplain || "-"}</td>
-                    <td>{r.nextFollowUp || "-"}</td>
+<td>{r.medicineExplain || "-"}</td>
+<td>{r.nextFollowUp || "-"}</td>
+
                     <td>
                       <select
                         className="status-dropdown"
