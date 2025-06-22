@@ -30,7 +30,7 @@ const Sidebar = () => {
     { name: "Assistant Doctor", icon: <FaUserMd />, path: "/assistant-doctor" },
     { name: "Account", icon: <FaFileInvoiceDollar />, path: "/account" },
     { name: "Medicine", icon: <FaCapsules />, path: "/medicine" },
-    { name: "Chithi", icon: <FaEnvelopeOpenText />, path: "/chithi" },
+   { name: "Chithi", icon: <FaEnvelopeOpenText />, path: "/chithi" },
     { name: "Packoing", icon: <FaBox />, path: "/packoing" },
     { name: "Courier", icon: <FaTruck />, path: "/courier" },
   ];

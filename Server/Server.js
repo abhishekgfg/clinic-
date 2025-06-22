@@ -9,6 +9,7 @@ const authRoutes = require("./routes/authRoutes");
 const assistantDoctorRoutes = require("./routes/assistantDoctorRoutes"); // ✅ FIXED lowercase
 const accountRoutes = require("./routes/accountRoutes"); 
 const medicineRoutes = require("./routes/medicineRoutes");
+const chithiRoutes = require("./routes/chithiRoutes");
 
 const app = express();
 
@@ -37,6 +38,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/assistant", assistantDoctorRoutes); // ✅ Route will now work
 app.use("/api/account", accountRoutes);
 app.use("/api/medicine", medicineRoutes);
+app.use("/api/chithi", chithiRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

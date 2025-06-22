@@ -9,6 +9,7 @@ import AppointmentsPage from "./pages/AppointmentsPage";
 import AssistantDoctorPage from "./pages/AssistantDoctorPage";
 import AccountPage from "./pages/AccountPage";
 import MedicinePage from "./pages/MedicinePage";
+import Chithi from "./pages/ChithiPage"; 
 
 
 
@@ -88,6 +89,15 @@ const AppRoutes = () => {
     </ProtectedRoute>
   }
 />
+<Route
+  path="/chithi"
+  element={
+    <ProtectedRoute>
+      <Chithi />
+    </ProtectedRoute>
+  }
+/>
+
 
     </Routes>
   );
