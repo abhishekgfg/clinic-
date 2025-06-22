@@ -271,3 +271,9 @@
     gap: 8px;
   }
 }
+
+@media (max-width: 768px) {
+  .appointments-title {
+    margin-top: 80px;
+  }
+}

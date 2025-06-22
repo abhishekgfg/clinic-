@@ -128,7 +128,7 @@ const AssistantDoctorPage = () => {
     <div className="assistant-doctor-page">
       <Sidebar />
       <div className="assistant-doctor-content">
-        <h2 className="assistant-title">👨‍⚕️ Assistant Doctor - Confirmed Patients</h2>
+        <h2 className="assistant-title">👨‍⚕️ Assistant Doctor</h2>
 
         <div className="search-bar">
           <input

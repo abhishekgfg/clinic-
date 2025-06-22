@@ -155,3 +155,9 @@
     width: 100%;
   }
 }
+
+@media (max-width: 768px) {
+  .assistant-title {
+    margin-top: 80px;
+  }
+}
