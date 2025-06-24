@@ -23,17 +23,18 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const baseMenuItems = [
-    { name: "Dashboard", icon: <FaHome />, path: "/dashboard" },
-    { name: "Patients", icon: <FaUserFriends />, path: "/patients" },
-    { name: "Appointments", icon: <FaCalendarAlt />, path: "/appointments" },
-    { name: "Assistant Doctor", icon: <FaUserMd />, path: "/assistant-doctor" },
-    { name: "Account", icon: <FaFileInvoiceDollar />, path: "/account" },
-    { name: "Medicine", icon: <FaCapsules />, path: "/medicine" },
-   { name: "Chithi", icon: <FaEnvelopeOpenText />, path: "/chithi" },
-    { name: "Packoing", icon: <FaBox />, path: "/packoing" },
-    { name: "Courier", icon: <FaTruck />, path: "/courier" },
-  ];
+ const baseMenuItems = [
+  { name: "Dashboard", icon: <FaHome />, path: "/dashboard" },
+  { name: "Patients", icon: <FaUserFriends />, path: "/patients" },
+  { name: "Appointments", icon: <FaCalendarAlt />, path: "/appointments" },
+  { name: "Assistant Doctor", icon: <FaUserMd />, path: "/assistant-doctor" },
+  { name: "Account", icon: <FaFileInvoiceDollar />, path: "/account" },
+  { name: "Medicine", icon: <FaCapsules />, path: "/medicine" },
+  { name: "Chithi", icon: <FaEnvelopeOpenText />, path: "/chithi" },
+  { name: "Packaging", icon: <FaBox />, path: "/packaging" },
+   { name: "Courier", icon: <FaTruck />, path: "/courier" },
+];
+
 
   const menuItems =
     user?.role === "admin"

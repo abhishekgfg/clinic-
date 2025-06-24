@@ -89,14 +89,49 @@ const AccountPage = () => {
     }
   };
 
-  // Convert "HH:mm" to "hh:mm AM/PM"
-  const formatTime12h = (time) => {
-    if (!time) return "";
-    const [hour, minute] = time.split(":").map(Number);
-    const ampm = hour >= 12 ? "PM" : "AM";
-    const hour12 = hour % 12 === 0 ? 12 : hour % 12;
-    return `${hour12}:${minute.toString().padStart(2, "0")} ${ampm}`;
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this record?")) return;
+    try {
+      await axios.delete(`/api/account/delete/${id}`);
+      setRecords((prev) => prev.filter((r) => r._id !== id));
+      alert("✅ Record deleted.");
+    } catch (err) {
+      console.error("Error deleting record", err);
+      alert("❌ Failed to delete record.");
+    }
   };
+
+ const formatTime12h = (time) => {
+  if (!time || typeof time !== "string") return "-";
+
+  // If already in "01:00 PM - 01:30 PM" format, return it as-is
+  if (time.includes("AM") || time.includes("PM")) return time;
+
+  // Try to parse HH:mm and convert to AM/PM
+  const [hourStr, minuteStr] = time.split(":");
+  const hour = parseInt(hourStr, 10);
+  const minute = parseInt(minuteStr, 10);
+
+  if (isNaN(hour) || isNaN(minute)) return "-";
+
+  const ampm = hour >= 12 ? "PM" : "AM";
+  const hour12 = hour % 12 === 0 ? 12 : hour % 12;
+  return `${hour12}:${minute.toString().padStart(2, "0")} ${ampm}`;
+};
+
+const formatDateTime12h = (dateTimeStr) => {
+  if (!dateTimeStr) return "-";
+  const dateObj = new Date(dateTimeStr);
+  return dateObj.toLocaleString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+};
+
 
   const filteredRecords = records.filter((r) => {
     const searchText = search.trim().toLowerCase();
@@ -173,7 +208,8 @@ const AccountPage = () => {
                   <th>Explain</th>
                   <th>Follow Up</th>
                   <th>Payment Status</th>
-                  <th>Payment Reference</th>
+                  <th>Reference #</th>
+                
                 </tr>
               </thead>
               <tbody>
@@ -188,7 +224,8 @@ const AccountPage = () => {
                     <td>{r.status}</td>
                     <td>{r.details || "-"}</td>
                     <td>{r.medicineExplain || "-"}</td>
-                    <td>{r.nextFollowUp || "-"}</td>
+                    <td>{formatDateTime12h(r.nextFollowUp)}</td>
+
                     <td>
                       <select
                         className="status-dropdown"
@@ -210,7 +247,7 @@ const AccountPage = () => {
                             className="ref-input"
                             placeholder="Enter Reference #"
                             value={
-                              editMode[r._id]
+                              editMode[r._id] || !r.referenceNumber
                                 ? paymentRefs[r._id] ?? r.referenceNumber ?? ""
                                 : r.referenceNumber ?? ""
                             }
@@ -220,7 +257,7 @@ const AccountPage = () => {
                                 [r._id]: e.target.value,
                               }))
                             }
-                            disabled={!editMode[r._id]} // Only disable if not in edit mode
+                            disabled={!(editMode[r._id] || !r.referenceNumber)}
                           />
                           {editMode[r._id] || !r.referenceNumber ? (
                             <button className="save-btn" onClick={() => handleReferenceSave(r)}>
@@ -243,6 +280,7 @@ const AccountPage = () => {
                         </div>
                       )}
                     </td>
+                   
                   </tr>
                 ))}
               </tbody>

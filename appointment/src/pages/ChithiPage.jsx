@@ -25,7 +25,8 @@ const ChithiPage = () => {
   const fetchRecords = async () => {
     try {
       const res = await axios.get("http://localhost:5000/api/chithi/all");
-      setRecords(res.data);
+      const filtered = res.data.filter((r) => r.medicineStatus === "Medicine Ready");
+      setRecords(filtered);
     } catch (err) {
       console.error("Error fetching chithi data:", err);
     }
@@ -137,6 +138,7 @@ const ChithiPage = () => {
                 <th>Follow Up</th>
                 <th>Medicine Payment</th>
                 <th>Reference</th>
+                <th>Medicine Status</th> {/* ✅ Added */}
                 <th>Chithi Status</th>
               </tr>
             </thead>
@@ -151,9 +153,21 @@ const ChithiPage = () => {
                   <td>{r.location || "-"}</td>
                   <td>{r.paymentStatus || "-"}</td>
                   <td>{r.details || "-"}</td>
-                  <td>{r.nextFollowUp ? new Date(r.nextFollowUp).toLocaleString() : "-"}</td>
+                  <td>
+                    {r.nextFollowUp
+                      ? new Date(r.nextFollowUp).toLocaleString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "2-digit",
+                          hour: "numeric",
+                          minute: "2-digit",
+                          hour12: true,
+                        })
+                      : "-"}
+                  </td>
                   <td>{r.action || "-"}</td>
                   <td>{r.referenceNumber || "-"}</td>
+                  <td>{r.medicineStatus || "-"}</td> {/* ✅ Added */}
                   <td>
                     <select
                       style={{ width: "180px" }}

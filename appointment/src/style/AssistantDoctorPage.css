@@ -97,6 +97,20 @@
   box-sizing: border-box;
 }
 
+
+
+/* Increase width for datetime and other wide inputs */
+.wide-input {
+  width: 220px;
+}
+
+.assistant-doctor-table td:nth-child(4), /* Date */
+.assistant-doctor-table td:nth-child(5), /* Time */
+.assistant-doctor-table td:nth-child(12) /* Next Follow Up */
+{
+  min-width: 180px;
+}
+
 .assistant-doctor-table td .action-buttons {
   display: flex;
   flex-direction: row;

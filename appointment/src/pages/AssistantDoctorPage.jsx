@@ -217,17 +217,26 @@ const AssistantDoctorPage = () => {
                         data.medicineExplain || "-"
                       )}
                     </td>
-                    <td>
-                      {editMode[id] ? (
-                        <input
-                          type="datetime-local"
-                          value={data.nextFollowUp || ""}
-                          onChange={(e) => handleChange(id, "nextFollowUp", e.target.value)}
-                        />
-                      ) : (
-                        data.nextFollowUp || "-"
-                      )}
-                    </td>
+                   <td>
+  {editMode[id] ? (
+    <input
+      type="datetime-local"
+      value={data.nextFollowUp || ""}
+      onChange={(e) => handleChange(id, "nextFollowUp", e.target.value)}
+    />
+  ) : data.nextFollowUp ? (
+    new Date(data.nextFollowUp).toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true, // 👈 ensures 12-hour format with AM/PM
+    })
+  ) : (
+    "-"
+  )}
+</td>
 
 
                    <td>

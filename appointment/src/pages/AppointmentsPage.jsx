@@ -6,6 +6,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import { useLocation } from "react-router-dom";
 import "../style/AppointmentTable.css";
 
 const generateTimeSlots = () => {
@@ -29,6 +30,10 @@ const generateTimeSlots = () => {
 
 const AppointmentsPage = () => {
   const { user } = useAuth();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const defaultStatus = searchParams.get("status") || "";
+
   const [appointments, setAppointments] = useState([]);
   const [patients, setPatients] = useState([]);
   const [formData, setFormData] = useState({
@@ -39,7 +44,7 @@ const AppointmentsPage = () => {
     location: "",
     message: "",
   });
-  const [filterStatus, setFilterStatus] = useState("");
+  const [filterStatus, setFilterStatus] = useState(defaultStatus);
   const [filterName, setFilterName] = useState("");
   const [filterContact, setFilterContact] = useState("");
   const [filterDate, setFilterDate] = useState("");
@@ -94,14 +99,7 @@ const AppointmentsPage = () => {
       await axios.post("/api/appointments/add", formData, {
         headers: { username: user?.username },
       });
-      setFormData({
-        patientId: "",
-        date: "",
-        time: "",
-        notes: "",
-        location: "",
-        message: "",
-      });
+      setFormData({ patientId: "", date: "", time: "", notes: "", location: "", message: "" });
       fetchData();
     } catch (err) {
       console.error("Error saving appointment", err);
@@ -110,12 +108,7 @@ const AppointmentsPage = () => {
   };
 
   const handleRescheduleOpen = (appointment) => {
-    setModalData({
-      id: appointment._id,
-      date: appointment.date,
-      time: appointment.time,
-      location: appointment.location,
-    });
+    setModalData({ id: appointment._id, date: appointment.date, time: appointment.time, location: appointment.location });
     setShowModal(true);
   };
 
@@ -129,12 +122,7 @@ const AppointmentsPage = () => {
     if (isSlotTaken) return alert("This time slot is already booked.");
 
     try {
-      await axios.patch(`/api/appointments/${id}/reschedule`, {
-        date,
-        time,
-        location,
-        status: "Rescheduled",
-      });
+      await axios.patch(`/api/appointments/${id}/reschedule`, { date, time, location, status: "Rescheduled" });
       setShowModal(false);
       fetchData();
     } catch (err) {
@@ -146,12 +134,7 @@ const AppointmentsPage = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this appointment?")) return;
     try {
-      await axios.delete(`/api/appointments/${id}`, {
-        headers: {
-          username: user?.username,
-          role: user?.role,
-        },
-      });
+      await axios.delete(`/api/appointments/${id}`, { headers: { username: user?.username, role: user?.role } });
       fetchData();
     } catch (err) {
       alert("Failed to delete appointment");
@@ -171,10 +154,7 @@ const AppointmentsPage = () => {
       app.notes || "N/A",
       app.status,
     ]);
-    autoTable(doc, {
-      head: [["Patient", "Contact", "Date", "Time", "Location", "Message", "Notes", "Status"]],
-      body: tableData,
-    });
+    autoTable(doc, { head: [["Patient", "Contact", "Date", "Time", "Location", "Message", "Notes", "Status"]], body: tableData });
     doc.save("appointments.pdf");
   };
 
@@ -210,26 +190,29 @@ const AppointmentsPage = () => {
     <div className="appointments-container">
       <Sidebar />
       <div className="appointments-content">
-        <h2 className="appointments-title">📅 Schedule an Appointment</h2>
-        <form className="appointments-form" onSubmit={handleSubmit}>
-          <select name="patientId" value={formData.patientId} onChange={handleChange} required>
-            <option value="">Select Patient</option>
-            {eligiblePatients.map((p) => (
-              <option key={p._id} value={p._id}>{`${p.name} (${p.contact})`}</option>
-            ))}
-          </select>
-          <input type="date" name="date" min={today} value={formData.date} onChange={handleChange} required />
-          <select name="time" value={formData.time} onChange={handleChange} required>
-            <option value="">Select Time</option>
-            {timeSlots.map((slot, i) => (
-              <option key={i} value={slot}>{slot}</option>
-            ))}
-          </select>
-          <input type="text" name="location" placeholder="Location" value={formData.location} onChange={handleChange} required />
-          <textarea name="message" placeholder="Message for patient" value={formData.message} onChange={handleChange}></textarea>
-          <textarea name="notes" placeholder="Notes" value={formData.notes} onChange={handleChange}></textarea>
-          <button type="submit">➕ Schedule</button>
-        </form>
+        <h2 className="appointments-title">\ud83d\uddd5\ufe0f Schedule an Appointment</h2>
+
+        {filterStatus !== "Rescheduled" && (
+          <form className="appointments-form" onSubmit={handleSubmit}>
+            <select name="patientId" value={formData.patientId} onChange={handleChange} required>
+              <option value="">Select Patient</option>
+              {eligiblePatients.map((p) => (
+                <option key={p._id} value={p._id}>{`${p.name} (${p.contact})`}</option>
+              ))}
+            </select>
+            <input type="date" name="date" min={today} value={formData.date} onChange={handleChange} required />
+            <select name="time" value={formData.time} onChange={handleChange} required>
+              <option value="">Select Time</option>
+              {timeSlots.map((slot, i) => (
+                <option key={i} value={slot}>{slot}</option>
+              ))}
+            </select>
+            <input type="text" name="location" placeholder="Location" value={formData.location} onChange={handleChange} required />
+            <textarea name="message" placeholder="Message for patient" value={formData.message} onChange={handleChange}></textarea>
+            <textarea name="notes" placeholder="Notes" value={formData.notes} onChange={handleChange}></textarea>
+            <button type="submit">\u2795 Schedule</button>
+          </form>
+        )}
 
         <div className="appointments-controls">
           <button onClick={exportToPDF}>Export to PDF</button>
@@ -283,10 +266,7 @@ const AppointmentsPage = () => {
                       if (newStatus === "Rescheduled") {
                         handleRescheduleOpen(a);
                       } else {
-                        axios
-                          .patch(`/api/appointments/${a._id}/status`, { status: newStatus })
-                          .then(fetchData)
-                          .catch(() => alert("Failed to update status"));
+                        axios.patch(`/api/appointments/${a._id}/status`, { status: newStatus }).then(fetchData).catch(() => alert("Failed to update status"));
                       }
                     }}
                   >
@@ -296,9 +276,7 @@ const AppointmentsPage = () => {
                   </select>
                 </td>
                 <td>
-                  {user?.role === "admin" && (
-                    <button onClick={() => handleDelete(a._id)}>Delete</button>
-                  )}
+                  {user?.role === "admin" && <button onClick={() => handleDelete(a._id)}>Delete</button>}
                 </td>
               </tr>
             ))}

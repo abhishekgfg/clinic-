@@ -10,6 +10,8 @@ const assistantDoctorRoutes = require("./routes/assistantDoctorRoutes"); // ✅ 
 const accountRoutes = require("./routes/accountRoutes"); 
 const medicineRoutes = require("./routes/medicineRoutes");
 const chithiRoutes = require("./routes/chithiRoutes");
+const packageRoutes = require("./routes/packageRoutes");
+const courierRoutes = require("./routes/courier");
 
 const app = express();
 
@@ -39,6 +41,8 @@ app.use("/api/assistant", assistantDoctorRoutes); // ✅ Route will now work
 app.use("/api/account", accountRoutes);
 app.use("/api/medicine", medicineRoutes);
 app.use("/api/chithi", chithiRoutes);
+app.use("/api/package", packageRoutes); 
+app.use("/api/courier", courierRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

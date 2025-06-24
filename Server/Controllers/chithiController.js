@@ -1,30 +1,35 @@
-const Account = require("../models/Account");
+const MedicineRecord = require("../models/MedicineRecord");
 const ChithiRecord = require("../models/ChithiRecord");
 
-// ✅ GET all chithi records (merged Account + ChithiRecord)
+// ✅ GET all chithi records (from MedicineRecord with medicineStatus "Medicine Ready")
 exports.getAllChithiRecords = async (req, res) => {
   try {
-    const accounts = await Account.find({}, {
-      displayId: 1,
-      patientName: 1,
-      contact: 1,
-      date: 1,
-      time: 1,
-      location: 1,
-      paymentStatus: 1,
-      details: 1,
-      medicineExplain: 1,
-      nextFollowUp: 1,
-      referenceNumber: 1,
-      action: 1,
-    }).sort({ createdAt: -1 });
+    // Fetch only records with medicineStatus === "Medicine Ready"
+    const medicineRecords = await MedicineRecord.find(
+      { medicineStatus: "Medicine Ready" },
+      {
+        displayId: 1,
+        patientName: 1,
+        contact: 1,
+        date: 1,
+        time: 1,
+        location: 1,
+        paymentStatus: 1,
+        details: 1,
+        medicineExplain: 1,
+        nextFollowUp: 1,
+        referenceNumber: 1,
+        action: 1,
+        medicineStatus: 1,
+      }
+    ).sort({ createdAt: -1 });
 
     const saved = await ChithiRecord.find();
 
-    const combined = accounts.map((acc) => {
-      const match = saved.find((r) => r.accountId.toString() === acc._id.toString());
+    const combined = medicineRecords.map((rec) => {
+      const match = saved.find((r) => r.accountId.toString() === rec._id.toString());
       return {
-        ...acc.toObject(),
+        ...rec.toObject(),
         chithiStatus: match?.chithiStatus || "In Progress",
       };
     });

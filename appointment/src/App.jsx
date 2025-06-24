@@ -10,6 +10,9 @@ import AssistantDoctorPage from "./pages/AssistantDoctorPage";
 import AccountPage from "./pages/AccountPage";
 import MedicinePage from "./pages/MedicinePage";
 import Chithi from "./pages/ChithiPage"; 
+import PackagePage from "./pages/PackagePage"; // ✅ correct
+import CourierPage from "./pages/CourierPage";
+
 
 
 
@@ -97,6 +100,25 @@ const AppRoutes = () => {
     </ProtectedRoute>
   }
 />
+
+<Route
+  path="/packaging" // ✅ corrected path
+  element={
+    <ProtectedRoute>
+      <PackagePage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/courier"
+  element={
+    <ProtectedRoute>
+      <CourierPage />
+    </ProtectedRoute>
+  }
+/>
+
 
 
     </Routes>

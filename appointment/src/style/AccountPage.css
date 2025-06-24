@@ -180,6 +180,17 @@
   font-size: 15px;
 }
 
+
+
+.ref-input:disabled {
+  background-color: #eee;
+  cursor: not-allowed;
+}
+
+.ref-input:not(:disabled) {
+  background-color: #fff;
+}
+  
 /* Header row */
 .account-modern-table thead {
   background-color: #0d6efd;

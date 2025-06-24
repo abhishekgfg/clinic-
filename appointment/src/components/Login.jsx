@@ -3,32 +3,30 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../style/Login.css";
+import "@fortawesome/fontawesome-free/css/all.min.css"; // ⬅️ Font Awesome
 
 const Login = () => {
   const [isSignup, setIsSignup] = useState(false);
   const [error, setError] = useState(null);
-  const [adminExists, setAdminExists] = useState(true); // assume true initially
-
+  const [adminExists, setAdminExists] = useState(true);
   const { login, user } = useAuth();
   const navigate = useNavigate();
 
   const [loginForm, setLoginForm] = useState({ username: "", password: "" });
   const [signupForm, setSignupForm] = useState({ username: "", password: "", role: "counser" });
 
-  // 🔍 Check if admin already exists in DB
   useEffect(() => {
     const checkAdmin = async () => {
       try {
-        await axios.get("http://localhost:5000/api/auth/admin-exists");
+        const res = await axios.get("http://localhost:5000/api/auth/admin-exists");
         setAdminExists(res.data.exists);
       } catch (err) {
-        setAdminExists(true); // fail-safe
+        setAdminExists(true);
       }
     };
     checkAdmin();
   }, []);
 
-  // Handle input changes
   const handleChange = (e, isLogin) => {
     const { name, value } = e.target;
     if (isLogin) {
@@ -38,11 +36,10 @@ const Login = () => {
     }
   };
 
-  // Handle login
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-       const res = await axios.post("http://localhost:5000/api/auth/login", loginForm);
+      const res = await axios.post("http://localhost:5000/api/auth/login", loginForm);
       const { username, role } = res.data;
       login(username, role);
       navigate("/dashboard");
@@ -51,7 +48,6 @@ const Login = () => {
     }
   };
 
-  // Handle signup (admin-only or first-time)
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
@@ -69,53 +65,69 @@ const Login = () => {
   return (
     <div className="login-container">
       <div className="login-card">
-        <h2>{isSignup ? "Create User" : "Clinic Panel Login"}</h2>
+        {/* Manovaidya Logo and Welcome */}
+        <div className="logo-section">
+          <img src="	https://manovaidya.com/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Flogo.1c88d462.png&w=640&q=75" alt="Manovaidya Logo" className="logo-image" />
+          <h3 className="welcome-text">Welcome!</h3>
+        </div>
+
+        <h2>{isSignup ? "Create User" : "🩺 Clinic Panel Login"}</h2>
         {error && <div className="error-message">{error}</div>}
 
         {!isSignup ? (
           !adminExists ? (
-            // First-time admin setup
             <form onSubmit={handleSignup}>
-              <input
-                type="text"
-                name="username"
-                placeholder="Create Admin Username"
-                value={signupForm.username}
-                onChange={(e) => handleChange(e, false)}
-                required
-              />
-              <input
-                type="password"
-                name="password"
-                placeholder="Create Admin Password"
-                value={signupForm.password}
-                onChange={(e) => handleChange(e, false)}
-                required
-              />
+              <div className="input-group">
+                <i className="fas fa-user icon" />
+                <input
+                  type="text"
+                  name="username"
+                  placeholder="Create Admin Username"
+                  value={signupForm.username}
+                  onChange={(e) => handleChange(e, false)}
+                  required
+                />
+              </div>
+              <div className="input-group">
+                <i className="fas fa-lock icon" />
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Create Admin Password"
+                  value={signupForm.password}
+                  onChange={(e) => handleChange(e, false)}
+                  required
+                />
+              </div>
               <select name="role" value="admin" disabled>
                 <option value="admin">Admin</option>
               </select>
               <button type="submit">Create Admin</button>
             </form>
           ) : (
-            // Login form
             <form onSubmit={handleLogin}>
-              <input
-                type="text"
-                name="username"
-                placeholder="Username"
-                value={loginForm.username}
-                onChange={(e) => handleChange(e, true)}
-                required
-              />
-              <input
-                type="password"
-                name="password"
-                placeholder="Password"
-                value={loginForm.password}
-                onChange={(e) => handleChange(e, true)}
-                required
-              />
+              <div className="input-group">
+                <i className="fas fa-user icon" />
+                <input
+                  type="text"
+                  name="username"
+                  placeholder="Username"
+                  value={loginForm.username}
+                  onChange={(e) => handleChange(e, true)}
+                  required
+                />
+              </div>
+              <div className="input-group">
+                <i className="fas fa-lock icon" />
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Password"
+                  value={loginForm.password}
+                  onChange={(e) => handleChange(e, true)}
+                  required
+                />
+              </div>
               <button type="submit">Login</button>
 
               {user?.role === "admin" && (
@@ -128,48 +140,49 @@ const Login = () => {
               )}
             </form>
           )
+        ) : user?.role !== "admin" ? (
+          <p>Access denied. Only admin can create users.</p>
         ) : (
-          // Admin creates user
-          <>
-            {user?.role !== "admin" ? (
-              <p>Access denied. Only admin can create users.</p>
-            ) : (
-              <form onSubmit={handleSignup}>
-                <input
-                  type="text"
-                  name="username"
-                  placeholder="New Username"
-                  value={signupForm.username}
-                  onChange={(e) => handleChange(e, false)}
-                  required
-                />
-                <input
-                  type="password"
-                  name="password"
-                  placeholder="New Password"
-                  value={signupForm.password}
-                  onChange={(e) => handleChange(e, false)}
-                  required
-                />
-                <select name="role" value={signupForm.role} onChange={(e) => handleChange(e, false)}>
-                  <option value="counser">Counser</option>
-                  <option value="receptionist">Receptionist</option>
-                  <option value="account">Account</option>
-                  <option value="medicine">Medicine</option>
-                  <option value="chithi">Chithi</option>
-                  <option value="packoing">Packoing</option>
-                  <option value="courier">Courier</option>
-                  <option value="admin">Admin</option>
-                </select>
-                <button type="submit">Create User</button>
-                <p style={{ marginTop: "10px" }}>
-                  <button type="button" onClick={() => setIsSignup(false)}>
-                    Back to Login
-                  </button>
-                </p>
-              </form>
-            )}
-          </>
+          <form onSubmit={handleSignup}>
+            <div className="input-group">
+              <i className="fas fa-user icon" />
+              <input
+                type="text"
+                name="username"
+                placeholder="New Username"
+                value={signupForm.username}
+                onChange={(e) => handleChange(e, false)}
+                required
+              />
+            </div>
+            <div className="input-group">
+              <i className="fas fa-lock icon" />
+              <input
+                type="password"
+                name="password"
+                placeholder="New Password"
+                value={signupForm.password}
+                onChange={(e) => handleChange(e, false)}
+                required
+              />
+            </div>
+            <select name="role" value={signupForm.role} onChange={(e) => handleChange(e, false)}>
+              <option value="counser">Counser</option>
+              <option value="receptionist">Receptionist</option>
+              <option value="account">Account</option>
+              <option value="medicine">Medicine</option>
+              <option value="chithi">Chithi</option>
+              <option value="packoing">Packoing</option>
+              <option value="courier">Courier</option>
+              <option value="admin">Admin</option>
+            </select>
+            <button type="submit">Create User</button>
+            <p style={{ marginTop: "10px" }}>
+              <button type="button" onClick={() => setIsSignup(false)}>
+                Back to Login
+              </button>
+            </p>
+          </form>
         )}
       </div>
     </div>
