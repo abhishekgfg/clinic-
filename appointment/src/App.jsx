@@ -12,6 +12,7 @@ import MedicinePage from "./pages/MedicinePage";
 import Chithi from "./pages/ChithiPage"; 
 import PackagePage from "./pages/PackagePage"; // ✅ correct
 import CourierPage from "./pages/CourierPage";
+import GoogleSheetPage from "./pages/GoogleSheetPage";
 
 
 
@@ -115,6 +116,14 @@ const AppRoutes = () => {
   element={
     <ProtectedRoute>
       <CourierPage />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/google-sheet"
+  element={
+    <ProtectedRoute>
+      <GoogleSheetPage />
     </ProtectedRoute>
   }
 />

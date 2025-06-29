@@ -1,5 +1,7 @@
 // controllers/appointmentController.js
 const Appointment = require("../models/Appointment");
+const Patient = require("../Models/Patient");
+const GooglePatient = require("../models/GooglePatientModel");
 
 // Add new appointment
 exports.addAppointment = async (req, res) => {
@@ -28,12 +30,27 @@ exports.addAppointment = async (req, res) => {
   }
 };
 
-// Get all appointments
+// Get all appointments with Patient or GooglePatient populated
 exports.getAllAppointments = async (req, res) => {
   try {
-    const appointments = await Appointment.find().populate("patientId");
-    res.json(appointments);
+    const appointments = await Appointment.find();
+
+    const populated = await Promise.all(
+      appointments.map(async (a) => {
+        let patient = await Patient.findById(a.patientId);
+        if (!patient) {
+          patient = await GooglePatient.findById(a.patientId);
+        }
+        return {
+          ...a.toObject(),
+          patientId: patient,
+        };
+      })
+    );
+
+    res.json(populated);
   } catch (err) {
+    console.error("Error in getAllAppointments:", err);
     res.status(500).json({ error: "Failed to fetch appointments" });
   }
 };
@@ -44,7 +61,7 @@ exports.updateAppointmentStatus = async (req, res) => {
     let { status } = req.body;
     if (!status) return res.status(400).json({ error: "Status is required" });
 
-    status = status.trim(); // ✅ Remove spaces
+    status = status.trim();
 
     const updated = await Appointment.findByIdAndUpdate(
       req.params.id,
@@ -59,6 +76,7 @@ exports.updateAppointmentStatus = async (req, res) => {
     res.status(500).json({ error: "Failed to update status" });
   }
 };
+
 // Delete appointment (admin only)
 exports.deleteAppointment = async (req, res) => {
   try {

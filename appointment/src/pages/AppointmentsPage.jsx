@@ -57,23 +57,21 @@ const AppointmentsPage = () => {
 
   const fetchData = async () => {
     try {
-      const res1 = await axios.get("/api/appointments/all", {
-        headers: { username: user?.username },
-      });
-      const res2 = await axios.get("/api/patients/all", {
-        headers: { username: user?.username },
-      });
+      const [res1, res2, res3] = await Promise.all([
+        axios.get("/api/appointments/all", { headers: { username: user?.username } }),
+        axios.get("/api/patients/all", { headers: { username: user?.username } }),
+        axios.get("/api/google-patients/all", { headers: { username: user?.username } }),
+      ]);
       setAppointments(res1.data);
-      setPatients(res2.data);
+      const mergedPatients = [...res2.data, ...res3.data.map(p => ({ ...p, isGoogle: true }))];
+      setPatients(mergedPatients);
     } catch (err) {
       console.error("Error fetching data", err);
     }
   };
 
   useEffect(() => {
-    if (user?.username) {
-      fetchData();
-    }
+    if (user?.username) fetchData();
   }, [user]);
 
   const eligiblePatients = patients.filter(
@@ -108,7 +106,12 @@ const AppointmentsPage = () => {
   };
 
   const handleRescheduleOpen = (appointment) => {
-    setModalData({ id: appointment._id, date: appointment.date, time: appointment.time, location: appointment.location });
+    setModalData({
+      id: appointment._id,
+      date: appointment.date,
+      time: appointment.time,
+      location: appointment.location,
+    });
     setShowModal(true);
   };
 
@@ -122,7 +125,12 @@ const AppointmentsPage = () => {
     if (isSlotTaken) return alert("This time slot is already booked.");
 
     try {
-      await axios.patch(`/api/appointments/${id}/reschedule`, { date, time, location, status: "Rescheduled" });
+      await axios.patch(`/api/appointments/${id}/reschedule`, {
+        date,
+        time,
+        location,
+        status: "Rescheduled",
+      });
       setShowModal(false);
       fetchData();
     } catch (err) {
@@ -134,7 +142,9 @@ const AppointmentsPage = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this appointment?")) return;
     try {
-      await axios.delete(`/api/appointments/${id}`, { headers: { username: user?.username, role: user?.role } });
+      await axios.delete(`/api/appointments/${id}`, {
+        headers: { username: user?.username, role: user?.role },
+      });
       fetchData();
     } catch (err) {
       alert("Failed to delete appointment");
@@ -154,7 +164,10 @@ const AppointmentsPage = () => {
       app.notes || "N/A",
       app.status,
     ]);
-    autoTable(doc, { head: [["Patient", "Contact", "Date", "Time", "Location", "Message", "Notes", "Status"]], body: tableData });
+    autoTable(doc, {
+      head: [["Patient", "Contact", "Date", "Time", "Location", "Message", "Notes", "Status"]],
+      body: tableData,
+    });
     doc.save("appointments.pdf");
   };
 
@@ -190,14 +203,16 @@ const AppointmentsPage = () => {
     <div className="appointments-container">
       <Sidebar />
       <div className="appointments-content">
-        <h2 className="appointments-title">\ud83d\uddd5\ufe0f Schedule an Appointment</h2>
+        <h2 className="appointments-title">🕕 Schedule an Appointment</h2>
 
         {filterStatus !== "Rescheduled" && (
           <form className="appointments-form" onSubmit={handleSubmit}>
             <select name="patientId" value={formData.patientId} onChange={handleChange} required>
               <option value="">Select Patient</option>
               {eligiblePatients.map((p) => (
-                <option key={p._id} value={p._id}>{`${p.name} (${p.contact})`}</option>
+                <option key={p._id} value={p._id}>
+                  {`${p.name} (${p.contact})`}
+                </option>
               ))}
             </select>
             <input type="date" name="date" min={today} value={formData.date} onChange={handleChange} required />
@@ -210,23 +225,23 @@ const AppointmentsPage = () => {
             <input type="text" name="location" placeholder="Location" value={formData.location} onChange={handleChange} required />
             <textarea name="message" placeholder="Message for patient" value={formData.message} onChange={handleChange}></textarea>
             <textarea name="notes" placeholder="Notes" value={formData.notes} onChange={handleChange}></textarea>
-            <button type="submit">\u2795 Schedule</button>
+            <button type="submit">➕ Schedule</button>
           </form>
         )}
 
         <div className="appointments-controls">
           <button onClick={exportToPDF}>Export to PDF</button>
           <button onClick={exportToExcel}>Export to Excel</button>
-          <input type="text" placeholder="Name" value={filterName} onChange={(e) => setFilterName(e.target.value)} style={{ width: "120px", marginRight: "5px" }} />
-          <input type="text" placeholder="Contact" value={filterContact} onChange={(e) => setFilterContact(e.target.value)} style={{ width: "120px", marginRight: "5px" }} />
-          <input type="date" value={filterDate} onChange={(e) => setFilterDate(e.target.value)} style={{ width: "140px", marginRight: "5px" }} />
-          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} style={{ width: "140px", marginRight: "5px" }}>
+          <input type="text" placeholder="Name" value={filterName} onChange={(e) => setFilterName(e.target.value)} />
+          <input type="text" placeholder="Contact" value={filterContact} onChange={(e) => setFilterContact(e.target.value)} />
+          <input type="date" value={filterDate} onChange={(e) => setFilterDate(e.target.value)} />
+          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
             <option value="">All Statuses</option>
             {["Scheduled", "confirmed", "Cancelled", "Rescheduled", "Not confirmed"].map((s) => (
               <option key={s} value={s}>{s}</option>
             ))}
           </select>
-          <select value={filterLocation} onChange={(e) => setFilterLocation(e.target.value)} style={{ width: "140px" }}>
+          <select value={filterLocation} onChange={(e) => setFilterLocation(e.target.value)}>
             <option value="">All Locations</option>
             {[...new Set(appointments.map((a) => a.location))].map((loc) => (
               <option key={loc} value={loc}>{loc}</option>
@@ -266,7 +281,10 @@ const AppointmentsPage = () => {
                       if (newStatus === "Rescheduled") {
                         handleRescheduleOpen(a);
                       } else {
-                        axios.patch(`/api/appointments/${a._id}/status`, { status: newStatus }).then(fetchData).catch(() => alert("Failed to update status"));
+                        axios
+                          .patch(`/api/appointments/${a._id}/status`, { status: newStatus })
+                          .then(fetchData)
+                          .catch(() => alert("Failed to update status"));
                       }
                     }}
                   >

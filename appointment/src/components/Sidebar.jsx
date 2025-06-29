@@ -17,6 +17,7 @@ import "../style/Sidebar.css";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
 
+
 const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { logout, user } = useAuth();
@@ -25,6 +26,8 @@ const Sidebar = () => {
 
  const baseMenuItems = [
   { name: "Dashboard", icon: <FaHome />, path: "/dashboard" },
+  { name: "Google Sheet", icon: <FaFileInvoiceDollar />, path: "/google-sheet" },
+
   { name: "Patients", icon: <FaUserFriends />, path: "/patients" },
   { name: "Appointments", icon: <FaCalendarAlt />, path: "/appointments" },
   { name: "Assistant Doctor", icon: <FaUserMd />, path: "/assistant-doctor" },
